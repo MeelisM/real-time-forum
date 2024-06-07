@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/server"
+)
 
 func main() {
-	fmt.Println("Beep boop!")
+	server.Start()
 }
