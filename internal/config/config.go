@@ -47,7 +47,9 @@ func loadEnvFile(filename string) {
 			continue
 		}
 		key, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
-		os.Setenv(key, value)
+		if os.Getenv(key) == "" {
+			os.Setenv(key, value)
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
