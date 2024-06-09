@@ -1,4 +1,4 @@
-package post
+package comment
 
 import (
 	"encoding/json"
@@ -13,16 +13,16 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
-	var post models.Post
-	err := json.NewDecoder(r.Body).Decode(&post)
+	var comment models.Comment
+	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	post.Id = uuid.New()
+	comment.Id = uuid.New()
 
-	err = h.PostService.Create(&post)
+	err = h.CommentService.Create(&comment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
