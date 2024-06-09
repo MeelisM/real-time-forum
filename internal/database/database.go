@@ -23,18 +23,39 @@ func Connect() (*sql.DB, error) {
 		return nil, err
 	}
 
+	err = createPostsTable(db)
+	if err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }
 
 func createUsersTable(db *sql.DB) error {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
-	id UUID PRIMARY KEY,
-	username TEXT NOT NULL,
-	email TEXT NOT NULL,
-	password TEXT NOT NULL
+		id UUID PRIMARY KEY,
+		username TEXT NOT NULL,
+		email TEXT NOT NULL,
+		password TEXT NOT NULL
 	)`)
 	if err != nil {
-		return fmt.Errorf("failed to creater users table: %v", err)
+		return fmt.Errorf("failed to create users table: %v", err)
+	}
+	return nil
+}
+
+func createPostsTable(db *sql.DB) error {
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS posts (
+		id UUID PRIMARY KEY,
+		title TEXT NOT NULL,
+		content TEXT NOT NULL,
+		user_id UUID NOT NULL,
+		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	)`)
+	if err != nil {
+		return fmt.Errorf("failed to create posts table: %v", err)
 	}
 	return nil
 }
