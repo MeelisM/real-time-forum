@@ -1,18 +1,24 @@
 package models
 
 import (
-	"strings"
-
 	"github.com/google/uuid"
 )
 
 type User struct {
-	Id       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
-	Password string    `json:"password"`
+	Id        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Age       int       `json:"age"`
+	Gender    Gender    `json:"gender"`
+	FirstName string    `json:"firstName"`
+	LastName  string    `json:"lastName"`
 }
 
-func (u *User) ToLowerCase(email string) {
-	u.Email = strings.ToLower(email)
-}
+type Gender string
+
+const (
+	Male   Gender = "Male"
+	Female Gender = "Female"
+	PNTS   Gender = "Prefer Not To Say"
+)

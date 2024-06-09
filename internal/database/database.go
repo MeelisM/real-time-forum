@@ -34,9 +34,13 @@ func Connect() (*sql.DB, error) {
 func createUsersTable(db *sql.DB) error {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
 		id UUID PRIMARY KEY,
-		username TEXT NOT NULL,
-		email TEXT NOT NULL,
-		password TEXT NOT NULL
+		username VARCHAR(32) NOT NULL CHECK(length(username) <= 32),
+		email VARCHAR(255) NOT NULL CHECK(length(email) <= 255),
+		password TEXT NOT NULL,
+		age INTEGER NOT NULL,
+		gender TEXT CHECK(Gender IN ('Male', 'Female', 'Prefer Not To Say')),
+		first_name VARCHAR(64) NOT NULL CHECK(length(first_name) <= 64),
+		last_name VARCHAR(64) NOT NULL CHECK(length(last_name) <= 64)
 	)`)
 	if err != nil {
 		return fmt.Errorf("failed to create users table: %v", err)
