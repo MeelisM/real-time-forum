@@ -26,7 +26,8 @@ func Start() error {
 	defer db.Close()
 
 	userService := services.NewUserService(db)
-	router := router.NewRouter(userService)
+	postService := services.NewPostService(db)
+	router := router.NewRouter(userService, postService)
 
 	// Initialize all the routes.
 	router.InitializeRoutes()
