@@ -22,7 +22,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	post.Id = uuid.New()
 
-	err = h.PostService.Create(post.Title, post.Content, post.UserId)
+	err = h.PostService.Create(post.Id, post.Title, post.Content, post.UserId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
