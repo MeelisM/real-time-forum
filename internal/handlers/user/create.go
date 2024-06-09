@@ -22,7 +22,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	user.Id = uuid.New()
 
-	err = h.UserService.Create(user.Username, user.Email, user.Password, user.Id)
+	err = h.UserService.Create(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
