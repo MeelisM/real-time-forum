@@ -28,6 +28,11 @@ func Connect() (*sql.DB, error) {
 		return nil, err
 	}
 
+	err = createCommentsTable(db)
+	if err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }
 
@@ -60,6 +65,22 @@ func createPostsTable(db *sql.DB) error {
 	)`)
 	if err != nil {
 		return fmt.Errorf("failed to create posts table: %v", err)
+	}
+	return nil
+}
+
+func createCommentsTable(db *sql.DB) error {
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS comments (
+		id UUID PRIMARY KEY,
+		content TEXT NOT NULL,
+		user_id UUID NOT NULL,
+		post_id UUID NOT NULL,
+		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY(user_id) REFERENCES users(id),
+		FOREIGN KEY(post_id) REFERENCES posts(id)
+	)`)
+	if err != nil {
+		return fmt.Errorf("failed to create comments table: %v", err)
 	}
 	return nil
 }
