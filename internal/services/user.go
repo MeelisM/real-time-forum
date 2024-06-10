@@ -10,6 +10,7 @@ import (
 
 type UserService interface {
 	Create(user *models.User) error
+	Validate(username, email string) (*models.User, error)
 }
 
 type UserDatabaseService struct {
@@ -50,4 +51,17 @@ func (uds *UserDatabaseService) isRegistered(user *models.User) (bool, error) {
 		return false, fmt.Errorf("failed to check if username, email or id exists: %v", err)
 	}
 	return count > 0, nil
+}
+
+func (uds *UserDatabaseService) Validate(username string, email string) (*models.User, error) {
+	var user models.User
+	err := uds.Database.QueryRow(`SELECT id, password FROM users WHERE username = ? OR email = ?`, username, email).Scan(&user.Id, &user.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		} else {
+			return nil, fmt.Errorf("failed to get user: %v", err)
+		}
+	}
+	return &user, nil
 }
