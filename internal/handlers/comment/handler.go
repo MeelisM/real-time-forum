@@ -1,6 +1,8 @@
 package comment
 
-import "01.kood.tech/git/mmumm/real-time-forum.git/internal/services"
+import (
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/services"
+)
 
 type Handler struct {
 	CommentService services.CommentService

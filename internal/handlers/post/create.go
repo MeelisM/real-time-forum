@@ -13,6 +13,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
+
 	var post models.Post
 	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
@@ -20,6 +21,23 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate title and content
+	if post.Title == "" || post.Content == "" {
+		http.Error(w, "Title and content cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	if len(post.Title) > 255 {
+		http.Error(w, "Title exceeds maximum length", http.StatusBadRequest)
+		return
+	}
+
+	if len(post.Content) > 10000 {
+		http.Error(w, "Content exceeds maximum length", http.StatusBadRequest)
+		return
+	}
+
+	// Generate new UUID for the post
 	post.Id = uuid.New()
 
 	err = h.PostService.Create(&post)

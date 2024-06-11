@@ -3,13 +3,14 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
 )
 
 type CommentService interface {
 	Create(comment *models.Comment) error
-	GetAll() ([]*models.Comment, error)
+	GetByID(postID string) ([]*models.Comment, error)
 }
 
 type CommentDatabaseService struct {
@@ -21,15 +22,8 @@ func NewCommentService(db *sql.DB) CommentService {
 }
 
 func (cds *CommentDatabaseService) Create(comment *models.Comment) error {
-	if comment.Content == "" {
-		return fmt.Errorf("content cannot be empty")
-	}
-
-	if len(comment.Content) > 1000 {
-		return fmt.Errorf("content exceeds maximum length")
-	}
-
-	createdAt := comment.CreatedAt
+	createdAt := time.Now()
+	comment.CreatedAt = createdAt
 
 	_, err := cds.Database.Exec(
 		"INSERT INTO comments (id, content, user_id, post_id, created_at) VALUES (?, ?, ?, ?, ?)",
@@ -41,8 +35,8 @@ func (cds *CommentDatabaseService) Create(comment *models.Comment) error {
 	return nil
 }
 
-func (cds *CommentDatabaseService) GetAll() ([]*models.Comment, error) {
-	rows, err := cds.Database.Query("SELECT id, content, user_id, post_id, created_at FROM comments")
+func (cds *CommentDatabaseService) GetByID(postID string) ([]*models.Comment, error) {
+	rows, err := cds.Database.Query("SELECT id, content, user_id, post_id, created_at FROM comments WHERE post_id = ?", postID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch comments: %v", err)
 	}

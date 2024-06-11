@@ -22,17 +22,10 @@ func NewPostService(db *sql.DB) PostService {
 }
 
 func (pds *PostDatabaseService) Create(post *models.Post) error {
-	if post.Title == "" || post.Content == "" {
-		return fmt.Errorf("title and content cannot be empty")
-	}
-
-	if len(post.Title) > 255 || len(post.Content) > 10000 {
-		return fmt.Errorf("title or content exceed maximum length")
-	}
-
-	// add timestamps
 	createdAt := time.Now()
 	updatedAt := createdAt
+	post.CreatedAt = createdAt
+	post.UpdatedAt = updatedAt
 
 	_, err := pds.Database.Exec(
 		"INSERT INTO posts (id, title, content, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
