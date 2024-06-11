@@ -5,18 +5,19 @@ import (
 	"net/http"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/utils"
 	"github.com/google/uuid"
 )
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		utils.HandleError(w, http.StatusBadRequest, "invalid request method")
 		return
 	}
 	var comment models.Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.HandleError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -24,9 +25,13 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = h.CommentService.Create(&comment)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	data := map[string]interface{}{
+		"commentId": comment.Id,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
 }

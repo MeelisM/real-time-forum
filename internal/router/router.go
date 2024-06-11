@@ -7,6 +7,7 @@ import (
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/handlers/ping"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/handlers/post"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/handlers/user"
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/middleware"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/services"
 )
 
@@ -31,9 +32,9 @@ func (r *Router) InitializeRoutes() {
 
 func (r *Router) initializeApiRoutes() {
 	apiPrefix := "/api"
-	r.Mux.HandleFunc(apiPrefix+"/user", r.UserHandler.Create)
-	r.Mux.HandleFunc(apiPrefix+"/post", r.PostHandler.Create)
-	r.Mux.HandleFunc(apiPrefix+"/comment", r.CommentHandler.Create)
-	r.Mux.HandleFunc(apiPrefix+"/ping", ping.PingHandler)
-	r.Mux.HandleFunc(apiPrefix+"/login", r.UserHandler.Login)
+	r.Mux.Handle(apiPrefix+"/user", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Create)))
+	r.Mux.Handle(apiPrefix+"/post", middleware.SendApiResponse(http.HandlerFunc(r.PostHandler.Create)))
+	r.Mux.Handle(apiPrefix+"/comment", middleware.SendApiResponse(http.HandlerFunc(r.CommentHandler.Create)))
+	r.Mux.Handle(apiPrefix+"/ping", middleware.SendApiResponse(http.HandlerFunc(ping.PingHandler)))
+	r.Mux.Handle(apiPrefix+"/login", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Login)))
 }
