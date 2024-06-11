@@ -5,35 +5,35 @@ import (
 	"net/http"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		utils.HandleError(w, http.StatusBadRequest, "invalid request method")
 		return
 	}
 
 	var user models.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.HandleError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	userFromDB, err := h.UserService.Validate(user.Username, user.Email)
 	if err != nil {
-		http.Error(w, "Invalid login credentials", http.StatusUnauthorized)
+		utils.HandleError(w, http.StatusBadRequest, "invalid login credentials")
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userFromDB.Password), []byte(user.Password))
 	if err != nil {
-		http.Error(w, "Invalid login credentials", http.StatusUnauthorized)
+		utils.HandleError(w, http.StatusUnauthorized, "invalid login credentials")
 		return
 	}
 
-	// If everything is okay, you can return the user's ID and a success message.
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"id": "` + userFromDB.Id.String() + `", "message": "Logged in"}`))
 }
