@@ -35,4 +35,5 @@ func (r *Router) initializeApiRoutes() {
 	r.Mux.HandleFunc(apiPrefix+"/post", r.PostHandler.Create)
 	r.Mux.HandleFunc(apiPrefix+"/comment", r.CommentHandler.Create)
 	r.Mux.HandleFunc(apiPrefix+"/ping", ping.PingHandler)
+	r.Mux.HandleFunc(apiPrefix+"/login", r.UserHandler.Login)
 }
