@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 	posts, err := h.PostService.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
