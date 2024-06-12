@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/handlers/comment"
-	"01.kood.tech/git/mmumm/real-time-forum.git/internal/handlers/ping"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/handlers/post"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/handlers/user"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/middleware"
@@ -32,11 +31,15 @@ func (r *Router) InitializeRoutes() {
 
 func (r *Router) initializeApiRoutes() {
 	apiPrefix := "/api"
-	r.Mux.Handle(apiPrefix+"/user", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Create)))
+	// user routes
+	r.Mux.Handle("POST "+apiPrefix+"/user", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Create)))
+	r.Mux.Handle("POST "+apiPrefix+"/user/login", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Login)))
+
+	// post routes
 	r.Mux.Handle("POST "+apiPrefix+"/post", middleware.SendApiResponse(http.HandlerFunc(r.PostHandler.Create)))
 	r.Mux.Handle("GET "+apiPrefix+"/post", middleware.SendApiResponse(http.HandlerFunc(r.PostHandler.List)))
+
+	// comment routes
 	r.Mux.Handle("POST "+apiPrefix+"/comment", middleware.SendApiResponse(http.HandlerFunc(r.CommentHandler.Create)))
 	r.Mux.Handle("GET "+apiPrefix+"/comment/{postId}", middleware.SendApiResponse(http.HandlerFunc(r.CommentHandler.ListByPostId)))
-	r.Mux.Handle(apiPrefix+"/ping", middleware.SendApiResponse(http.HandlerFunc(ping.PingHandler)))
-	r.Mux.Handle(apiPrefix+"/login", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Login)))
 }
