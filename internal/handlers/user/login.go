@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/errors"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
-	"01.kood.tech/git/mmumm/real-time-forum.git/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,19 +15,19 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
+		errors.Handle(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
 		return
 	}
 
 	userFromDB, token, err := h.UserService.Validate(user.Username, user.Email)
 	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, "invalid login credentials")
+		errors.Handle(w, http.StatusBadRequest, "invalid login credentials")
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userFromDB.Password), []byte(user.Password))
 	if err != nil {
-		utils.HandleError(w, http.StatusUnauthorized, "invalid login credentials")
+		errors.Handle(w, http.StatusUnauthorized, "invalid login credentials")
 		return
 	}
 

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/errors"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
-	"01.kood.tech/git/mmumm/real-time-forum.git/internal/utils"
 	"github.com/google/uuid"
 )
 
@@ -16,12 +16,22 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
+		errors.Handle(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
 		return
 	}
 
-	if strings.TrimSpace(user.Username) == "" || strings.TrimSpace(user.Email) == "" {
-		utils.HandleError(w, http.StatusBadRequest, "username and email required")
+	if strings.TrimSpace(user.Username) == "" || len(strings.TrimSpace(user.Username)) < 3 {
+		errors.Handle(w, http.StatusBadRequest, "username is required and should be at least 3 characters long")
+		return
+	}
+
+	if strings.TrimSpace(user.Email) == "" || !strings.Contains(user.Email, "@") {
+		errors.Handle(w, http.StatusBadRequest, "a valid email is required")
+		return
+	}
+
+	if len(strings.TrimSpace(user.Password)) < 8 {
+		errors.Handle(w, http.StatusBadRequest, "password is required and should be at least 8 characters long")
 		return
 	}
 
@@ -29,7 +39,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = h.UserService.Create(&user)
 	if err != nil {
-		utils.HandleError(w, http.StatusConflict, "failed to create user")
+		errors.Handle(w, http.StatusConflict, fmt.Sprintf("an error occurred while creating the user: %v", err))
 		return
 	}
 
