@@ -33,8 +33,10 @@ func (r *Router) InitializeRoutes() {
 func (r *Router) initializeApiRoutes() {
 	apiPrefix := "/api"
 	r.Mux.Handle(apiPrefix+"/user", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Create)))
-	r.Mux.Handle(apiPrefix+"/post", middleware.SendApiResponse(http.HandlerFunc(r.PostHandler.Create)))
-	r.Mux.Handle(apiPrefix+"/comment", middleware.SendApiResponse(http.HandlerFunc(r.CommentHandler.Create)))
+	r.Mux.Handle("POST "+apiPrefix+"/post", middleware.SendApiResponse(http.HandlerFunc(r.PostHandler.Create)))
+	r.Mux.Handle("GET "+apiPrefix+"/post", middleware.SendApiResponse(http.HandlerFunc(r.PostHandler.GetAll)))
+	r.Mux.Handle("POST "+apiPrefix+"/comment", middleware.SendApiResponse(http.HandlerFunc(r.CommentHandler.Create)))
+	r.Mux.Handle("GET "+apiPrefix+"/comment", middleware.SendApiResponse(http.HandlerFunc(r.CommentHandler.GetById)))
 	r.Mux.Handle(apiPrefix+"/ping", middleware.SendApiResponse(http.HandlerFunc(ping.PingHandler)))
 	r.Mux.Handle(apiPrefix+"/login", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Login)))
 }

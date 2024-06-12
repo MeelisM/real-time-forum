@@ -14,3 +14,8 @@ type Post struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+type PostWithComments struct {
+	Post
+	Comments []*Comment `json:"comments"`
+}

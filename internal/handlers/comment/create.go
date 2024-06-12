@@ -14,6 +14,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		utils.HandleError(w, http.StatusBadRequest, "invalid request method")
 		return
 	}
+
 	var comment models.Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
@@ -21,6 +22,18 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate content
+	if comment.Content == "" {
+		http.Error(w, "Content cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	if len(comment.Content) > 1000 {
+		http.Error(w, "Content exceeds maximum length", http.StatusBadRequest)
+		return
+	}
+
+	// Generate new UUID for the comment
 	comment.Id = uuid.New()
 
 	err = h.CommentService.Create(&comment)
