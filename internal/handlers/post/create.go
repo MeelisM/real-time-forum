@@ -2,6 +2,7 @@ package post
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
@@ -10,16 +11,12 @@ import (
 )
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		utils.HandleError(w, http.StatusBadRequest, "invalid request method")
-		return
-	}
 
 	var post models.Post
 
 	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
+		utils.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
 		return
 	}
 
@@ -28,27 +25,11 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(post.Title) > 255 || len(post.Content) > 10000 {
-		utils.HandleError(w, http.StatusBadRequest, "title or content exceed maximum length")
+		utils.HandleError(w, http.StatusBadRequest, "title or content exceeds maximum length")
 		return
 	}
 	if _, err := uuid.Parse(post.UserId.String()); err != nil {
-		utils.HandleError(w, http.StatusBadRequest, "invalid userId, it must be a valid UUID")
-		return
-	}
-
-	// Validate title and content
-	if post.Title == "" || post.Content == "" {
-		http.Error(w, "Title and content cannot be empty", http.StatusBadRequest)
-		return
-	}
-
-	if len(post.Title) > 255 {
-		http.Error(w, "Title exceeds maximum length", http.StatusBadRequest)
-		return
-	}
-
-	if len(post.Content) > 10000 {
-		http.Error(w, "Content exceeds maximum length", http.StatusBadRequest)
+		utils.HandleError(w, http.StatusBadRequest, "invalid userId")
 		return
 	}
 
@@ -57,7 +38,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = h.PostService.Create(&post)
 	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, err.Error())
+		utils.HandleError(w, http.StatusInternalServerError, "an error ocurred while creating the post")
 		return
 	}
 

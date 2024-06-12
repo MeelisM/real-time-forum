@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -11,16 +12,11 @@ import (
 )
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		utils.HandleError(w, http.StatusBadRequest, "invalid request method")
-		return
-	}
-
 	var user models.User
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
+		utils.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
 		return
 	}
 
@@ -33,7 +29,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = h.UserService.Create(&user)
 	if err != nil {
-		utils.HandleError(w, http.StatusConflict, err.Error())
+		utils.HandleError(w, http.StatusConflict, "failed to create user")
 		return
 	}
 

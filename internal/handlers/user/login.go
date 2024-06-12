@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
@@ -10,19 +11,15 @@ import (
 )
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		utils.HandleError(w, http.StatusBadRequest, "invalid request method")
-		return
-	}
-
 	var user models.User
+
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
+		utils.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
 		return
 	}
 
-	userFromDB, err := h.UserService.Validate(user.Username, user.Email)
+	userFromDB, token, err := h.UserService.Validate(user.Username, user.Email)
 	if err != nil {
 		utils.HandleError(w, http.StatusBadRequest, "invalid login credentials")
 		return
@@ -35,5 +32,5 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"id": "` + userFromDB.Id.String() + `", "message": "Logged in"}`))
+	w.Write([]byte(`{"id": "` + userFromDB.Id.String() + `", "token": "` + token + `", "message": "Logged in"}`))
 }
