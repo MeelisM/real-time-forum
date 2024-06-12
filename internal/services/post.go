@@ -22,6 +22,8 @@ func NewPostService(db *sql.DB) PostService {
 }
 
 func (pds *PostDatabaseService) Create(post *models.Post) error {
+
+	// add timestamps
 	createdAt := time.Now()
 	updatedAt := createdAt
 	post.CreatedAt = createdAt

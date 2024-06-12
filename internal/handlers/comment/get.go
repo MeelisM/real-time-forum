@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetById(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("postId")
 	if postID == "" {
 		http.Error(w, "Missing postId query parameter", http.StatusBadRequest)
