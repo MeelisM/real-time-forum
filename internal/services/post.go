@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
@@ -23,7 +24,6 @@ func NewPostService(db *sql.DB) PostService {
 
 func (pds *PostDatabaseService) Create(post *models.Post) error {
 
-	// add timestamps
 	createdAt := time.Now()
 	updatedAt := createdAt
 	post.CreatedAt = createdAt
@@ -34,6 +34,9 @@ func (pds *PostDatabaseService) Create(post *models.Post) error {
 		post.Id, post.Title, post.Content, post.UserId, createdAt, updatedAt,
 	)
 	if err != nil {
+		if strings.Contains(err.Error(), "FOREIGN KEY constraint failed") {
+			return fmt.Errorf("user ID not found")
+		}
 		return fmt.Errorf("failed to insert post: %v", err)
 	}
 	return nil

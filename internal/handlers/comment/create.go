@@ -2,43 +2,37 @@ package comment
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/errors"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
-	"01.kood.tech/git/mmumm/real-time-forum.git/internal/utils"
 	"github.com/google/uuid"
 )
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		utils.HandleError(w, http.StatusBadRequest, "invalid request method")
-		return
-	}
-
 	var comment models.Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
+		errors.Handle(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
 		return
 	}
 
-	// Validate content
 	if comment.Content == "" {
-		http.Error(w, "Content cannot be empty", http.StatusBadRequest)
+		errors.Handle(w, http.StatusBadRequest, "content cannot be empty")
 		return
 	}
 
 	if len(comment.Content) > 1000 {
-		http.Error(w, "Content exceeds maximum length", http.StatusBadRequest)
+		errors.Handle(w, http.StatusBadRequest, "content exceeds maximum length")
 		return
 	}
 
-	// Generate new UUID for the comment
 	comment.Id = uuid.New()
 
 	err = h.CommentService.Create(&comment)
 	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, err.Error())
+		errors.Handle(w, http.StatusInternalServerError, "an error occurred while creating the comment")
 		return
 	}
 

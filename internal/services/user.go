@@ -3,14 +3,17 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
+	"01.kood.tech/git/mmumm/real-time-forum.git/internal/config"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
+	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
 	Create(user *models.User) error
-	Validate(username, email string) (*models.User, error)
+	Validate(username, email string) (*models.User, string, error)
 }
 
 type UserDatabaseService struct {
@@ -53,15 +56,35 @@ func (uds *UserDatabaseService) isRegistered(user *models.User) (bool, error) {
 	return count > 0, nil
 }
 
-func (uds *UserDatabaseService) Validate(username string, email string) (*models.User, error) {
+func (uds *UserDatabaseService) Validate(username string, email string) (*models.User, string, error) {
 	var user models.User
 	err := uds.Database.QueryRow(`SELECT id, password FROM users WHERE username = ? OR email = ?`, username, email).Scan(&user.Id, &user.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("user not found")
+			return nil, "", fmt.Errorf("user not found")
 		} else {
-			return nil, fmt.Errorf("failed to get user: %v", err)
+			return nil, "", fmt.Errorf("failed to get user: %v", err)
 		}
 	}
-	return &user, nil
+
+	token, err := createToken(user.Id.String())
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to create token: %v", err)
+	}
+
+	return &user, token, nil
+}
+
+func createToken(userId string) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["user_id"] = userId
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	tokenString, err := token.SignedString([]byte(config.LoadConfig().JWTSecret))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }

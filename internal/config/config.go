@@ -9,7 +9,8 @@ import (
 )
 
 type Config struct {
-	Port string
+	Port      string
+	JWTSecret string
 }
 
 var (
@@ -59,4 +60,5 @@ func loadEnvFile(filename string) {
 
 func loadFromEnv(config *Config) {
 	config.Port = os.Getenv("PORT")
+	config.JWTSecret = os.Getenv("JWT_SECRET")
 }

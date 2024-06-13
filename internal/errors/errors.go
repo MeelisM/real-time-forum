@@ -1,4 +1,4 @@
-package utils
+package errors
 
 import (
 	"net/http"
@@ -10,7 +10,7 @@ type Error struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
-func HandleError(w http.ResponseWriter, code int, message string) {
+func Handle(w http.ResponseWriter, code int, message string) {
 	w.WriteHeader(code)
 	w.Write([]byte(message))
 }
