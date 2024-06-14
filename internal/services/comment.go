@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
@@ -30,6 +31,9 @@ func (cds *CommentDatabaseService) Create(comment *models.Comment) error {
 		comment.Id, comment.Content, comment.UserId, comment.PostId, createdAt,
 	)
 	if err != nil {
+		if strings.Contains(err.Error(), "FOREIGN KEY constraint failed") {
+			return fmt.Errorf("user id not found")
+		}
 		return fmt.Errorf("failed to insert comment: %v", err)
 	}
 	return nil

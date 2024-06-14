@@ -10,12 +10,12 @@ import (
 func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 	posts, err := h.PostService.GetAll()
 	if err != nil {
-		errors.Handle(w, http.StatusInternalServerError, err.Error())
+		errors.Handle(w, http.StatusInternalServerError, "failed to fetch posts", err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(posts); err != nil {
-		errors.Handle(w, http.StatusInternalServerError, err.Error())
+		errors.Handle(w, http.StatusInternalServerError, "failed to encode posts to JSON", err)
 	}
 }

@@ -2,7 +2,6 @@ package comment
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/errors"
@@ -14,17 +13,17 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var comment models.Comment
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
-		errors.Handle(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
+		errors.Handle(w, http.StatusBadRequest, "invalid request format", err)
 		return
 	}
 
 	if comment.Content == "" {
-		errors.Handle(w, http.StatusBadRequest, "content cannot be empty")
+		errors.Handle(w, http.StatusBadRequest, "content cannot be empty", nil)
 		return
 	}
 
 	if len(comment.Content) > 1000 {
-		errors.Handle(w, http.StatusBadRequest, "content exceeds maximum length")
+		errors.Handle(w, http.StatusBadRequest, "content exceeds maximum length", nil)
 		return
 	}
 
@@ -32,7 +31,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = h.CommentService.Create(&comment)
 	if err != nil {
-		errors.Handle(w, http.StatusInternalServerError, "an error occurred while creating the comment")
+		errors.Handle(w, http.StatusInternalServerError, "an error occurred while creating the comment", err)
 		return
 	}
 

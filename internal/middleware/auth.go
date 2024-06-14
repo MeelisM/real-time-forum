@@ -13,13 +13,13 @@ func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			errors.Handle(w, http.StatusUnauthorized, "authorization header missing")
+			errors.Handle(w, http.StatusUnauthorized, "authorization header missing", nil)
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			errors.Handle(w, http.StatusUnauthorized, "invalid authorization header")
+			errors.Handle(w, http.StatusUnauthorized, "invalid authorization header", nil)
 			return
 		}
 
@@ -29,7 +29,7 @@ func Authenticate(next http.Handler) http.Handler {
 		})
 
 		if err != nil || !token.Valid {
-			errors.Handle(w, http.StatusUnauthorized, "invalid token")
+			errors.Handle(w, http.StatusUnauthorized, "invalid token", err)
 			return
 		}
 		next.ServeHTTP(w, r)
