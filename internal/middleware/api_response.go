@@ -42,6 +42,7 @@ func SendApiResponse(next http.Handler) http.Handler {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(recorder.Code)
 		json.NewEncoder(w).Encode(response)
 	})
 }
