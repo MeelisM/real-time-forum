@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/config"
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
@@ -64,12 +63,11 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 			log.Printf("error: %v", err)
 			delete(clients, client)
 			delete(onlineUsers, userID)
-			close(client.Send) // Close the Send channel.
+			close(client.Send)
 			notifyUserStatus(userID, "offline")
 			break
 		}
 
-		// Parse the incoming message to get the receiver ID
 		var incomingMessage models.Message
 		err = json.Unmarshal(msg, &incomingMessage)
 		if err != nil {
@@ -77,22 +75,18 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		// Create a new message model
 		message := models.Message{
 			Id:         uuid.New().String(),
 			Content:    incomingMessage.Content,
 			SenderId:   userID,
-			ReceiverId: incomingMessage.ReceiverId, // Set the receiver ID
-			CreatedAt:  time.Now(),
+			ReceiverId: incomingMessage.ReceiverId,
 		}
 
-		// Save the message
 		err = h.ChatService.CreateMessage(&message)
 		if err != nil {
 			log.Printf("error saving message: %v", err)
 		}
 
-		// Send the message to the receiver if they are online
 		if receiver, ok := onlineUsers[message.ReceiverId]; ok {
 			receiver.Send <- msg
 		}

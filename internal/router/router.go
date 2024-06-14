@@ -47,5 +47,6 @@ func (r *Router) initializeApiRoutes() {
 	r.Mux.Handle("POST "+apiPrefix+"/comment", middleware.SendApiResponse(middleware.Authenticate(http.HandlerFunc(r.CommentHandler.Create))))
 	r.Mux.Handle("GET "+apiPrefix+"/comment/{postId}", middleware.SendApiResponse(middleware.Authenticate(http.HandlerFunc(r.CommentHandler.ListByPostId))))
 
+	// websocket
 	r.Mux.HandleFunc("/ws", r.ChatHandler.HandleConnections)
 }
