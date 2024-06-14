@@ -26,7 +26,8 @@ func Start() error {
 	userService := services.NewUserService(db)
 	postService := services.NewPostService(db)
 	commentService := services.NewCommentService(db)
-	router := router.NewRouter(userService, postService, commentService)
+	chatService := services.NewChatService(db)
+	router := router.NewRouter(userService, postService, commentService, chatService)
 
 	// Initialize all the routes.
 	router.InitializeRoutes()
