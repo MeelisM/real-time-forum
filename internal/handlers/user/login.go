@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/errors"
@@ -15,19 +14,19 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		errors.Handle(w, http.StatusBadRequest, fmt.Sprintf("invalid request format: %v", err))
+		errors.Handle(w, http.StatusBadRequest, "invalid request format", err)
 		return
 	}
 
 	userFromDB, token, err := h.UserService.Validate(user.Username, user.Email)
 	if err != nil {
-		errors.Handle(w, http.StatusBadRequest, "invalid login credentials")
+		errors.Handle(w, http.StatusBadRequest, "invalid login credentials", err)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userFromDB.Password), []byte(user.Password))
 	if err != nil {
-		errors.Handle(w, http.StatusUnauthorized, "invalid login credentials")
+		errors.Handle(w, http.StatusUnauthorized, "invalid login credentials", err)
 		return
 	}
 
