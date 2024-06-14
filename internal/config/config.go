@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	Port      string
-	JWTSecret string
+	Port            string
+	JWTSecret       string
+	OriginAllowlist []string
 }
 
 var (
@@ -24,6 +25,16 @@ func LoadConfig() *Config {
 
 		loadEnvFile(".env")
 		loadFromEnv(config)
+
+		if config.Port == "" {
+			log.Fatalf("Missing PORT in environment variables!")
+		}
+		if config.JWTSecret == "" {
+			log.Fatalf("Missing JWT_SECRET in environment variables!")
+		}
+		if len(config.OriginAllowlist) == 0 || config.OriginAllowlist[0] == "" {
+			log.Fatalf("Missing ORIGIN_ALLOWLIST in environment variables!")
+		}
 	})
 
 	return config
@@ -61,4 +72,5 @@ func loadEnvFile(filename string) {
 func loadFromEnv(config *Config) {
 	config.Port = os.Getenv("PORT")
 	config.JWTSecret = os.Getenv("JWT_SECRET")
+	config.OriginAllowlist = strings.Split(os.Getenv("ORIGIN_ALLOWLIST"), ",")
 }

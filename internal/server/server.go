@@ -14,9 +14,6 @@ import (
 func Start() error {
 	// Load environment variables.
 	cfg := config.LoadConfig()
-	if cfg.Port == "" {
-		log.Fatalf("Missing PORT environment variable!")
-	}
 
 	// Connect to the database.
 	db, err := database.Connect()
@@ -35,5 +32,5 @@ func Start() error {
 	router.InitializeRoutes()
 
 	log.Printf("Server started on port %s\n", cfg.Port)
-	return http.ListenAndServe(":"+cfg.Port, middleware.CheckCORS(router.Mux))
+	return http.ListenAndServe(":"+cfg.Port, middleware.CheckCORS(router.Mux, cfg.OriginAllowlist))
 }

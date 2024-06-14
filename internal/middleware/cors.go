@@ -4,24 +4,8 @@ import (
 	"net/http"
 )
 
-// List of allowed origins
-var originAllowlist = []string{
-	"http://127.0.0.1:5500", // Local URL for Live Server
-	"http://localhost:5500",
-}
-
-// Check if the origin is in the allowlist
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
-}
-
 // Middleware to handle CORS
-func CheckCORS(next http.Handler) http.Handler {
+func CheckCORS(next http.Handler, originAllowlist []string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 		if contains(originAllowlist, origin) {
@@ -39,4 +23,14 @@ func CheckCORS(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+// Check if the origin is in the allowlist
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
