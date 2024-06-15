@@ -1,4 +1,7 @@
 bin/
-internal/database/forum.db
+/internal/database/forum.db
 .env
 .vscode
+.git
+node_modules/
+dist/
