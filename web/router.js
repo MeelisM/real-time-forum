@@ -1,26 +1,47 @@
 import LoginView from "./views/login.js";
 import ForumView from "./views/forum.js";
 
-export const Router = {
-  routes: [
-    { path: "/", view: "login" },
-    { path: "/forum", view: "forum" },
-  ],
-  init: function () {
+class Router {
+  constructor(routes) {
+    this.routes = routes;
+    this.init();
+  }
+
+  init() {
     this.handleRouteChange = this.handleRouteChange.bind(this);
     this.handleRouteChange();
     window.addEventListener("hashchange", this.handleRouteChange);
-  },
-  handleRouteChange: function () {
-    const path = window.location.hash.slice(1) || "/";
-    const route = this.routes.find((r) => r.path === path);
-    if (route) {
-      document.getElementById("app").innerHTML = Views[route.view]();
-    }
-  },
-};
+  }
 
-export const Views = {
-  login: LoginView,
-  forum: ForumView,
-};
+  async handleRouteChange() {
+    const path = window.location.hash.slice(1) || "/";
+    const route =
+      this.routes.find((r) => r.path === path) ||
+      this.routes.find((r) => r.path === "*");
+    if (route) {
+      if (route.protected && !this.isAuthenticated()) {
+        window.location.hash = "/";
+        document.getElementById("app").innerHTML = await LoginView();
+      } else {
+        document.getElementById("app").innerHTML = await route.view();
+      }
+    }
+  }
+
+  isAuthenticated() {
+    const token = localStorage.getItem("authToken");
+    return !!token;
+  }
+
+  navigate(path) {
+    window.location.hash = path;
+  }
+}
+
+const routes = [
+  { path: "/", view: LoginView },
+  { path: "/forum", view: ForumView, protected: true },
+  { path: "*", view: () => "<h1>404 Not Found</h1>" },
+];
+
+export default new Router(routes);
