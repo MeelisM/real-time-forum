@@ -33,6 +33,11 @@ func Connect() (*sql.DB, error) {
 		return nil, err
 	}
 
+	err = createMessagesTable(db)
+	if err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }
 
@@ -81,6 +86,20 @@ func createCommentsTable(db *sql.DB) error {
 	)`)
 	if err != nil {
 		return fmt.Errorf("failed to create comments table: %v", err)
+	}
+	return nil
+}
+
+func createMessagesTable(db *sql.DB) error {
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS messages (
+		id TEXT PRIMARY KEY,
+		content TEXT,
+		sender_id TEXT,
+		receiver_id TEXT,
+		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	)`)
+	if err != nil {
+		return fmt.Errorf("failed to create messages table: %v", err)
 	}
 	return nil
 }

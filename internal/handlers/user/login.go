@@ -18,7 +18,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userFromDB, token, err := h.UserService.Validate(user.Username, user.Email)
+	userFromDB, token, err := h.UserService.ValidateLogin(user.Username, user.Email)
 	if err != nil {
 		errors.Handle(w, http.StatusBadRequest, "invalid login credentials", err)
 		return
