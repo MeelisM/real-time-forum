@@ -37,7 +37,7 @@ export async function renderChat() {
     } else if (data.type === "chat_message") {
       displayMessage(data);
     } else if (data.type === "initial_online_users") {
-      onlineUsers = data.userIDs;
+      onlineUsers = data.onlineUsers;
       renderOnlineUsers();
     }
   };
@@ -62,12 +62,14 @@ export async function renderChat() {
 }
 
 function updateOnlineUsers(data) {
-  const { userID, status } = data;
-  console.log("Updating online user:", userID, "status:", status); // Debugging log
-  if (status === "online" && !onlineUsers.includes(userID)) {
-    onlineUsers.push(userID);
+  const { userId, username, status } = data;
+  if (
+    status === "online" &&
+    !onlineUsers.some((user) => user.userId === userId)
+  ) {
+    onlineUsers.push({ userId, username });
   } else if (status === "offline") {
-    onlineUsers = onlineUsers.filter((user) => user !== userID);
+    onlineUsers = onlineUsers.filter((user) => user.userId !== userId);
   }
   renderOnlineUsers();
 }
@@ -75,19 +77,22 @@ function updateOnlineUsers(data) {
 function renderOnlineUsers() {
   const onlineUsersDiv = document.getElementById("online-users");
   onlineUsersDiv.innerHTML = "";
-  onlineUsers.forEach((userID) => {
+  onlineUsers.forEach((user) => {
     const userStatus = document.createElement("div");
-    userStatus.setAttribute("data-user-id", userID);
-    userStatus.textContent = `${userID} is online`;
+    userStatus.setAttribute("data-user-id", user.userId);
+    userStatus.textContent = `${user.username} is online`;
     userStatus.classList.add("online-user");
-    userStatus.addEventListener("click", () => selectUser(userID));
+    userStatus.addEventListener("click", () => selectUser(user.userId));
     onlineUsersDiv.appendChild(userStatus);
   });
 }
 
 function selectUser(userID) {
-  selectedUser = userID;
-  document.getElementById("message-input").placeholder = `Message to ${userID}`;
+  const user = onlineUsers.find((user) => user.userId === userId);
+  selectedUser = userId;
+  document.getElementById(
+    "message-input"
+  ).placeholder = `Message to ${user.username}`;
   const userElements = document.querySelectorAll(".online-user");
   userElements.forEach((element) => {
     if (element.getAttribute("data-user-id") === userID) {

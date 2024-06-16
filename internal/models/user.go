@@ -22,3 +22,8 @@ const (
 	Female Gender = "Female"
 	PNTS   Gender = "Prefer Not To Say"
 )
+
+type UserClaims struct {
+	Username string    `json:"username"`
+	UserId   uuid.UUID `json:"userId"`
+}

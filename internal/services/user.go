@@ -13,7 +13,7 @@ import (
 
 type UserService interface {
 	Create(user *models.User) error
-	Validate(username, email string) (*models.User, string, error)
+	ValidateLogin(username, email string) (*models.User, string, error)
 }
 
 type UserDatabaseService struct {
@@ -56,9 +56,9 @@ func (uds *UserDatabaseService) isRegistered(user *models.User) (bool, error) {
 	return count > 0, nil
 }
 
-func (uds *UserDatabaseService) Validate(username string, email string) (*models.User, string, error) {
+func (uds *UserDatabaseService) ValidateLogin(username string, email string) (*models.User, string, error) {
 	var user models.User
-	err := uds.Database.QueryRow(`SELECT id, password FROM users WHERE username = ? OR email = ?`, username, email).Scan(&user.Id, &user.Password)
+	err := uds.Database.QueryRow(`SELECT id, username, password FROM users WHERE username = ? OR email = ?`, username, email).Scan(&user.Id, &user.Username, &user.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, "", fmt.Errorf("user not found")
@@ -67,7 +67,13 @@ func (uds *UserDatabaseService) Validate(username string, email string) (*models
 		}
 	}
 
-	token, err := createToken(user.Id.String())
+	userClaims := models.UserClaims{
+		Username: user.Username,
+		UserId:   user.Id,
+	}
+	fmt.Println(userClaims)
+
+	token, err := createToken(userClaims)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to create token: %v", err)
 	}
@@ -75,11 +81,12 @@ func (uds *UserDatabaseService) Validate(username string, email string) (*models
 	return &user, token, nil
 }
 
-func createToken(userId string) (string, error) {
+func createToken(userClaims models.UserClaims) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = userId
+	claims["user_id"] = userClaims.UserId.String()
+	claims["username"] = userClaims.Username
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 	tokenString, err := token.SignedString([]byte(config.LoadConfig().JWTSecret))

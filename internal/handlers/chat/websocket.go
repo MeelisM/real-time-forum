@@ -21,10 +21,11 @@ var upgrader = websocket.Upgrader{
 }
 
 type Client struct {
-	Conn    *websocket.Conn
-	Send    chan []byte
-	UserID  string
-	Handler *Handler
+	Conn     *websocket.Conn
+	Send     chan []byte
+	UserId   string
+	Username string
+	Handler  *Handler
 }
 
 var clients = make(map[*Client]bool)
@@ -39,7 +40,7 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := validateToken(token)
+	userId, username, err := validateToken(token)
 	if err != nil {
 		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
@@ -51,15 +52,15 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 
-	client := &Client{Conn: ws, Send: make(chan []byte), UserID: userID, Handler: h}
+	client := &Client{Conn: ws, Send: make(chan []byte), UserId: userId, Username: username, Handler: h}
 
 	mu.Lock()
 	clients[client] = true
-	onlineUsers[userID] = client
+	onlineUsers[userId] = client
 	mu.Unlock()
 
-	log.Printf("User connected: %s", userID)
-	notifyUserStatus(userID, "online")
+	log.Printf("User connected: %s", userId)
+	notifyUserStatus(userId, username, "online")
 
 	go handleMessages(client)
 
@@ -82,7 +83,7 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 		message := models.Message{
 			Id:         uuid.New().String(),
 			Content:    incomingMessage.Content,
-			SenderId:   userID,
+			SenderId:   userId,
 			ReceiverId: incomingMessage.ReceiverId,
 		}
 
@@ -98,19 +99,19 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 
 	mu.Lock()
 	delete(clients, client)
-	delete(onlineUsers, userID)
+	delete(onlineUsers, userId)
 	mu.Unlock()
 	close(client.Send)
 
-	log.Printf("User disconnected: %s", userID)
-	notifyUserStatus(userID, "offline")
+	log.Printf("User disconnected: %s", userId)
+	notifyUserStatus(userId, username, "offline")
 }
 
 func handleMessages(client *Client) {
 	for {
 		msg, ok := <-client.Send
 		if !ok {
-			log.Printf("Send channel closed for user: %s", client.UserID)
+			log.Printf("Send channel closed for user: %s", client.UserId)
 			return
 		}
 		err := client.Conn.WriteMessage(websocket.TextMessage, msg)
@@ -126,7 +127,7 @@ func HandleBroadcast() {
 		msg := <-broadcast
 		mu.Lock()
 		for client := range clients {
-			log.Printf("Broadcasting to client: %s", client.UserID)
+			log.Printf("Broadcasting to client: %s", client.UserId)
 			select {
 			case client.Send <- msg:
 			default:
@@ -137,47 +138,55 @@ func HandleBroadcast() {
 	}
 }
 
-func notifyUserStatus(userID, status string) {
-	statusMessage := fmt.Sprintf(`{"type": "user_status", "userID": "%s", "status": "%s"}`, userID, status)
+func notifyUserStatus(userId, username, status string) {
+	statusMessage := fmt.Sprintf(`{"type": "user_status", "userId": "%s", "username": "%s", "status": "%s"}`, userId, username, status)
 	log.Printf("Notify user status: %s", statusMessage)
 	message := []byte(statusMessage)
 	broadcast <- message
 }
 
-func validateToken(tokenString string) (string, error) {
+func validateToken(tokenString string) (string, string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.LoadConfig().JWTSecret), nil
 	})
 
 	if err != nil || !token.Valid {
-		return "", fmt.Errorf("invalid token")
+		return "", "", fmt.Errorf("invalid token")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", fmt.Errorf("invalid token claims")
+		return "", "", fmt.Errorf("invalid token claims")
 	}
 
-	userID, ok := claims["user_id"].(string)
+	userId, ok := claims["user_id"].(string)
 	if !ok {
-		return "", fmt.Errorf("invalid user ID in token")
+		return "", "", fmt.Errorf("invalid user ID in token")
 	}
 
-	return userID, nil
+	username, ok := claims["username"].(string)
+	if !ok {
+		return "", "", fmt.Errorf("invalid username in token")
+	}
+
+	return userId, username, nil
 }
 
 func sendInitialOnlineUsers(client *Client) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	var onlineUserIDs []string
+	var onlineUsersList []map[string]string
 	for _, c := range onlineUsers {
-		onlineUserIDs = append(onlineUserIDs, c.UserID)
+		onlineUsersList = append(onlineUsersList, map[string]string{
+			"userId":   c.UserId,
+			"username": c.Username,
+		})
 	}
 
 	initialUsersMessage, err := json.Marshal(map[string]interface{}{
-		"type":    "initial_online_users",
-		"userIDs": onlineUserIDs,
+		"type":        "initial_online_users",
+		"onlineUsers": onlineUsersList,
 	})
 	if err != nil {
 		log.Printf("error marshalling initial online users: %v", err)
