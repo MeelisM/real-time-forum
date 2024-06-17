@@ -11,12 +11,23 @@ export async function renderChat() {
   }
 
   chatContainer.innerHTML = `
-    <h1>Chat</h1>
-    <div id="online-users"></div>
-    <div id="offline-users"></div>
-    <div id="chat-messages"></div>
-    <input type="text" id="message-input" placeholder="Type a message...">
-    <button id="send-button">Send</button>
+    <div id="chat-header">
+      <button id="back-button" style="display: none;">Back</button>
+      <span>Chat</span>
+    </div>
+    <div id="chat-body">
+      <div id="user-list-container">
+        <div id="online-users"></div>
+        <div id="offline-users"></div>
+      </div>
+      <div id="chat-messages-container">
+        <div id="chat-messages"></div>
+        <div id="message-input-container">
+          <input type="text" id="message-input" placeholder="Message" />
+          <button id="send-button">Send</button>
+        </div>
+      </div>
+    </div>
   `;
 
   await fetchAllUsers();
@@ -63,6 +74,11 @@ export async function renderChat() {
     } else {
       alert("Please select a user to send a message.");
     }
+  });
+
+  document.getElementById("back-button").addEventListener("click", () => {
+    selectedUser = null;
+    renderUserList();
   });
 }
 
@@ -119,17 +135,11 @@ function renderOnlineUsers() {
   onlineUsersDiv.innerHTML = "";
   offlineUsersDiv.innerHTML = "";
 
-  // Sort online users alphabetically and numerically
-  onlineUsers.sort((a, b) => a.username.localeCompare(b.username, undefined, {numeric: true}));
-
-  // Sort offline users alphabetically and numerically
-  offlineUsers.sort((a, b) => a.username.localeCompare(b.username, undefined, {numeric: true}));
-
   onlineUsers.forEach((user) => {
     const userStatus = document.createElement("div");
     userStatus.setAttribute("data-user-id", user.userId);
     userStatus.textContent = `${user.username} is online`;
-    userStatus.classList.add("online-user");
+    userStatus.classList.add("user-status", "online-user");
     userStatus.addEventListener("click", () => selectUser(user.userId));
     onlineUsersDiv.appendChild(userStatus);
   });
@@ -138,7 +148,7 @@ function renderOnlineUsers() {
     const userStatus = document.createElement("div");
     userStatus.setAttribute("data-user-id", user.userId);
     userStatus.textContent = `${user.username} is offline`;
-    userStatus.classList.add("offline-user");
+    userStatus.classList.add("user-status", "offline-user");
     userStatus.addEventListener("click", () => selectUser(user.userId));
     offlineUsersDiv.appendChild(userStatus);
   });
@@ -147,7 +157,18 @@ function renderOnlineUsers() {
 function selectUser(userID) {
   const user = [...onlineUsers, ...offlineUsers].find((user) => user.userId === userID);
   selectedUser = userID;
-  document.getElementById("message-input").placeholder = `Message to ${user.username}`;
+  document.getElementById("chat-header").innerHTML = `
+    <button id="back-button">Back</button>
+    <span>${user.username}</span>
+  `;
+  document.getElementById("back-button").addEventListener("click", () => {
+    selectedUser = null;
+    document.getElementById("chat-header").innerHTML = `<span>Chat</span>`;
+    renderUserList();
+  });
+  document.getElementById("chat-messages-container").style.display = "flex";
+  document.getElementById("user-list-container").style.display = "none";
+  document.getElementById("message-input").placeholder`Message to ${user.username}`;
   const userElements = document.querySelectorAll(".online-user, .offline-user");
   userElements.forEach((element) => {
     if (element.getAttribute("data-user-id") === userID) {
@@ -156,14 +177,25 @@ function selectUser(userID) {
       element.classList.remove("selected");
     }
   });
+  renderChatMessages(); // Function to render messages for the selected user
+}
+
+function renderUserList() {
+  document.getElementById("chat-messages-container").style.display = "none";
+  document.getElementById("user-list-container").style.display = "block";
+  renderOnlineUsers();
+}
+
+function renderChatMessages() {
+  const chatMessagesDiv = document.getElementById("chat-messages");
+  chatMessagesDiv.innerHTML = messages.map(message => `
+    <div class="message">
+      <strong>${message.sender}:</strong> ${message.content}
+    </div>
+  `).join('');
 }
 
 function displayMessage(messageData) {
-  const chatMessagesDiv = document.getElementById("chat-messages");
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message");
-  messageDiv.innerHTML = `
-    <p><strong>${messageData.senderId}:</strong> ${messageData.content}</p>
-  `;
-  chatMessagesDiv.appendChild(messageDiv);
+  messages.push({ sender: messageData.senderId, content: messageData.content });
+  renderChatMessages();
 }
