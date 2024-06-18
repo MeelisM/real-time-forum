@@ -3,6 +3,7 @@ let offlineUsers = [];
 let selectedUser = null;
 let messages = [];
 let ws = null;
+let loggedInUserId = null; // Store the logged-in user's ID
 
 function getUsernameById(userId) {
   const user = [...onlineUsers, ...offlineUsers].find(user => user.userId === userId);
@@ -51,41 +52,52 @@ export async function renderChat() {
 }
 
 function setupWebSocket() {
-  ws = new WebSocket(
-    `ws://localhost:8080/ws?token=${localStorage.getItem("authToken")}`
-  );
+  let wsUrl = `ws://localhost:8080/ws?token=${localStorage.getItem("authToken")}`;
+  ws = new WebSocket(wsUrl);
 
   ws.onopen = function () {
     console.log("Connected to chat");
+    const token = localStorage.getItem("authToken");
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    loggedInUserId = payload.user_id;
   };
 
   ws.onerror = function (event) {
     console.error("WebSocket error:", event);
   };
 
+  ws.onclose = function(event) {
+    console.log("WebSocket is closed now. Attempting to reconnect...");
+    setTimeout(() => setupWebSocket(), 5000); // Try to reconnect every 5 seconds
+  };
+
   ws.onmessage = function (event) {
     const data = JSON.parse(event.data);
     console.log("Received message:", data);
-    switch (data.type) {
-      case "chat_history":
-        messages = data.messages || []; // Handle null messages
-        renderChatMessages();
-        break;
-      case "user_status":
-        updateOnlineUsers(data);
-        break;
-      case "chat_message":
-        displayMessage(data);
-        break;
-      case "initial_online_users":
-        onlineUsers = data.onlineUsers;
-        removeDuplicateUsers();
-        renderOnlineUsers();
-        break;
-      default:
-        console.log("Unknown message type:", data.type);
-    }
+    handleWebSocketData(data);
   };
+}
+
+function handleWebSocketData(data) {
+  switch (data.type) {
+    case "chat_history":
+      messages = data.messages || []; // Handle null messages
+      renderChatMessages();
+      break;
+    case "user_status":
+      updateOnlineUsers(data);
+      break;
+    case "chat_message":
+      displayMessage(data);
+      break;
+    case "initial_online_users":
+      onlineUsers = data.onlineUsers;
+      removeDuplicateUsers();
+      renderOnlineUsers();
+      break;
+    default:
+      console.log("Unknown message type:", data.type);
+  }
 }
 
 function sendMessage() {
@@ -96,12 +108,12 @@ function sendMessage() {
       type: "chat_message",
       content: message,
       receiverId: selectedUser,
-      senderId: "You"
+      senderId: loggedInUserId // Use the logged-in user's ID
     };
     ws.send(JSON.stringify(messageData));
     messageInput.value = "";
-  } else if (!selectedUser) {
-    alert("Please select a user to send a message.");
+    // Display the sent message immediately
+    displayMessage(messageData);
   }
 }
 
@@ -118,7 +130,10 @@ async function fetchAllUsers() {
     console.log("Fetched users:", data);
 
     if (data.code === 200 && data.data && Array.isArray(data.data.data)) {
-      offlineUsers = data.data.data.map(user => ({ userId: user.id, username: user.username }));
+      offlineUsers = data.data.data.map(user => ({
+        userId: user.id,
+        username: user.username
+      }));
     } else {
       console.error("Failed to fetch users or data format is incorrect:", data.message);
       offlineUsers = [];
@@ -215,18 +230,23 @@ function renderUserList() {
 
 function renderChatMessages() {
   const chatMessagesDiv = document.getElementById("chat-messages");
-  chatMessagesDiv.innerHTML = messages
-    .filter(message => message.receiverId === selectedUser || message.senderId === selectedUser)
-    .map(message => `
-      <div class="message">
-        <strong>${message.senderId === "You" ? "You" : getUsernameById(message.senderId)}:</strong> ${message.content}
-      </div>
-    `).join('');
+  if (chatMessagesDiv) {
+      chatMessagesDiv.innerHTML = messages
+          .filter(message => (message.receiverId === selectedUser && message.senderId === loggedInUserId) ||
+                             (message.senderId === selectedUser && message.receiverId === loggedInUserId))
+          .map(message => `
+              <div class="message">
+                  <strong>${message.senderId === loggedInUserId ? "You" : getUsernameById(message.senderId)}:</strong>
+                  ${message.content}
+              </div>
+          `).join('');
+  }
 }
 
 function displayMessage(messageData) {
   messages.push(messageData);
-  if (messageData.receiverId === selectedUser || messageData.senderId === selectedUser) {
-    renderChatMessages();
+  if ((messageData.receiverId === selectedUser && messageData.senderId === loggedInUserId) ||
+      (messageData.senderId === selectedUser && messageData.receiverId === loggedInUserId)) {
+      renderChatMessages();
   }
 }

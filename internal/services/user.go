@@ -98,7 +98,7 @@ func createToken(userClaims models.UserClaims) (string, error) {
 }
 
 func (uds *UserDatabaseService) GetAllUsers() ([]models.User, error) {
-	rows, err := uds.Database.Query("SELECT username FROM users")
+	rows, err := uds.Database.Query("SELECT id, username FROM users")
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users: %v", err)
 	}
@@ -107,9 +107,9 @@ func (uds *UserDatabaseService) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.Username)
+		err := rows.Scan(&user.Id, &user.Username)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan username: %v", err)
+			return nil, fmt.Errorf("failed to scan user: %v", err)
 		}
 		users = append(users, user)
 	}
