@@ -1,7 +1,13 @@
 let onlineUsers = [];
 let offlineUsers = [];
 let selectedUser = null;
+let messages = [];
 let ws = null;
+
+function getUsernameById(userId) {
+  const user = [...onlineUsers, ...offlineUsers].find(user => user.userId === userId);
+  return user ? user.username : 'Unknown';
+}
 
 export async function renderChat() {
   const chatContainer = document.getElementById("chat-container");
@@ -20,18 +26,31 @@ export async function renderChat() {
         <div id="online-users"></div>
         <div id="offline-users"></div>
       </div>
-      <div id="chat-messages-container">
+      <div id="chat-messages-container" style="display: none;">
         <div id="chat-messages"></div>
         <div id="message-input-container">
           <input type="text" id="message-input" placeholder="Message" />
-          <button id="send-button">Send</button>
+          <button type="button" id="send-button">Send</button>
         </div>
       </div>
     </div>
   `;
 
   await fetchAllUsers();
+  setupWebSocket();
 
+  document.getElementById("send-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    sendMessage();
+  });
+
+  document.getElementById("back-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    goBackToUserList();
+  });
+}
+
+function setupWebSocket() {
   ws = new WebSocket(
     `ws://localhost:8080/ws?token=${localStorage.getItem("authToken")}`
   );
@@ -46,40 +65,44 @@ export async function renderChat() {
 
   ws.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    console.log("Received message:", data); // Debugging log
-    if (data.type === "user_status") {
-      updateOnlineUsers(data);
-    } else if (data.type === "chat_message") {
-      displayMessage(data);
-    } else if (data.type === "initial_online_users") {
-      onlineUsers = data.onlineUsers;
-      removeDuplicateUsers();
-      renderOnlineUsers();
+    console.log("Received message:", data);
+    switch (data.type) {
+      case "chat_history":
+        messages = data.messages || []; // Handle null messages
+        renderChatMessages();
+        break;
+      case "user_status":
+        updateOnlineUsers(data);
+        break;
+      case "chat_message":
+        displayMessage(data);
+        break;
+      case "initial_online_users":
+        onlineUsers = data.onlineUsers;
+        removeDuplicateUsers();
+        renderOnlineUsers();
+        break;
+      default:
+        console.log("Unknown message type:", data.type);
     }
   };
+}
 
-  document.getElementById("send-button").addEventListener("click", () => {
-    const messageInput = document.getElementById("message-input");
-    const message = messageInput.value;
+function sendMessage() {
+  const messageInput = document.getElementById("message-input");
+  const message = messageInput.value.trim();
+  if (message && selectedUser) {
+    const messageData = {
+      type: "chat_message",
+      content: message,
+      receiverId: selectedUser,
+      senderId: "You"
+    };
+    ws.send(JSON.stringify(messageData));
     messageInput.value = "";
-
-    if (selectedUser) {
-      ws.send(
-        JSON.stringify({
-          type: "chat_message",
-          content: message,
-          receiverId: selectedUser,
-        })
-      );
-    } else {
-      alert("Please select a user to send a message.");
-    }
-  });
-
-  document.getElementById("back-button").addEventListener("click", () => {
-    selectedUser = null;
-    renderUserList();
-  });
+  } else if (!selectedUser) {
+    alert("Please select a user to send a message.");
+  }
 }
 
 async function fetchAllUsers() {
@@ -92,7 +115,7 @@ async function fetchAllUsers() {
     });
 
     const data = await response.json();
-    console.log("Fetched users:", data); // Debugging log
+    console.log("Fetched users:", data);
 
     if (data.code === 200 && data.data && Array.isArray(data.data.data)) {
       offlineUsers = data.data.data.map(user => ({ userId: user.id, username: user.username }));
@@ -108,15 +131,12 @@ async function fetchAllUsers() {
 
 function updateOnlineUsers(data) {
   const { userId, username, status } = data;
-  if (
-    status === "online" &&
-    !onlineUsers.some((user) => user.userId === userId)
-  ) {
+  if (status === "online" && !onlineUsers.some((user) => user.userId === userId)) {
     onlineUsers.push({ userId, username });
-    offlineUsers = offlineUsers.filter((user) => user.username !== username);
+    offlineUsers = offlineUsers.filter((user) => user.userId !== userId);
   } else if (status === "offline") {
     onlineUsers = onlineUsers.filter((user) => user.userId !== userId);
-    if (!offlineUsers.some((user) => user.username === username)) {
+    if (!offlineUsers.some((user) => user.userId === userId)) {
       offlineUsers.push({ userId, username });
     }
   }
@@ -161,14 +181,13 @@ function selectUser(userID) {
     <button id="back-button">Back</button>
     <span>${user.username}</span>
   `;
-  document.getElementById("back-button").addEventListener("click", () => {
-    selectedUser = null;
-    document.getElementById("chat-header").innerHTML = `<span>Chat</span>`;
-    renderUserList();
+  document.getElementById("back-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    goBackToUserList();
   });
   document.getElementById("chat-messages-container").style.display = "flex";
   document.getElementById("user-list-container").style.display = "none";
-  document.getElementById("message-input").placeholder`Message to ${user.username}`;
+  document.getElementById("message-input").placeholder = `Message to ${user.username}`;
   const userElements = document.querySelectorAll(".online-user, .offline-user");
   userElements.forEach((element) => {
     if (element.getAttribute("data-user-id") === userID) {
@@ -177,7 +196,15 @@ function selectUser(userID) {
       element.classList.remove("selected");
     }
   });
-  renderChatMessages(); // Function to render messages for the selected user
+
+  // Request chat history for the selected user
+  ws.send(JSON.stringify({ type: "get_chat_history", receiverId: selectedUser }));
+}
+
+function goBackToUserList() {
+  selectedUser = null;
+  document.getElementById("chat-header").innerHTML = `<span>Chat</span>`;
+  renderUserList();
 }
 
 function renderUserList() {
@@ -188,14 +215,18 @@ function renderUserList() {
 
 function renderChatMessages() {
   const chatMessagesDiv = document.getElementById("chat-messages");
-  chatMessagesDiv.innerHTML = messages.map(message => `
-    <div class="message">
-      <strong>${message.sender}:</strong> ${message.content}
-    </div>
-  `).join('');
+  chatMessagesDiv.innerHTML = messages
+    .filter(message => message.receiverId === selectedUser || message.senderId === selectedUser)
+    .map(message => `
+      <div class="message">
+        <strong>${message.senderId === "You" ? "You" : getUsernameById(message.senderId)}:</strong> ${message.content}
+      </div>
+    `).join('');
 }
 
 function displayMessage(messageData) {
-  messages.push({ sender: messageData.senderId, content: messageData.content });
-  renderChatMessages();
+  messages.push(messageData);
+  if (messageData.receiverId === selectedUser || messageData.senderId === selectedUser) {
+    renderChatMessages();
+  }
 }

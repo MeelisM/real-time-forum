@@ -80,20 +80,13 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		message := models.Message{
-			Id:         uuid.New().String(),
-			Content:    incomingMessage.Content,
-			SenderId:   userId,
-			ReceiverId: incomingMessage.ReceiverId,
-		}
-
-		err = h.ChatService.CreateMessage(&message)
-		if err != nil {
-			log.Printf("error saving message: %v", err)
-		}
-
-		if receiver, ok := onlineUsers[message.ReceiverId]; ok {
-			receiver.Send <- msg
+		switch incomingMessage.Type {
+		case "chat_message":
+			handleChatMessage(client, incomingMessage)
+		case "get_chat_history":
+			sendChatHistory(client, incomingMessage.ReceiverId)
+		default:
+			log.Printf("Unknown message type: %s", incomingMessage.Type)
 		}
 	}
 
@@ -105,6 +98,37 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("User disconnected: %s", userId)
 	notifyUserStatus(userId, username, "offline")
+}
+
+func handleChatMessage(client *Client, incomingMessage models.Message) {
+	message := models.Message{
+		Id:         uuid.New().String(),
+		Content:    incomingMessage.Content,
+		SenderId:   client.UserId,
+		ReceiverId: incomingMessage.ReceiverId,
+	}
+
+	err := client.Handler.ChatService.CreateMessage(&message)
+	if err != nil {
+		log.Printf("error saving message: %v", err)
+	}
+
+	messageData, err := json.Marshal(map[string]interface{}{
+		"type":       "chat_message",
+		"id":         message.Id,
+		"content":    message.Content,
+		"senderId":   message.SenderId,
+		"receiverId": message.ReceiverId,
+		"createdAt":  message.CreatedAt,
+	})
+	if err != nil {
+		log.Printf("error marshalling message data: %v", err)
+		return
+	}
+
+	if receiver, ok := onlineUsers[message.ReceiverId]; ok {
+		receiver.Send <- messageData
+	}
 }
 
 func handleMessages(client *Client) {
@@ -194,4 +218,23 @@ func sendInitialOnlineUsers(client *Client) {
 	}
 
 	client.Send <- initialUsersMessage
+}
+
+func sendChatHistory(client *Client, userId string) {
+	messages, err := client.Handler.ChatService.GetMessagesByUserID(userId)
+	if err != nil {
+		log.Printf("error fetching chat history: %v", err)
+		return
+	}
+
+	historyMessage, err := json.Marshal(map[string]interface{}{
+		"type":     "chat_history",
+		"messages": messages,
+	})
+	if err != nil {
+		log.Printf("error marshalling chat history: %v", err)
+		return
+	}
+
+	client.Send <- historyMessage
 }
