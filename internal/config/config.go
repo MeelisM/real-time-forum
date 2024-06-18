@@ -35,6 +35,7 @@ func LoadConfig() *Config {
 		if len(config.OriginAllowlist) == 0 || config.OriginAllowlist[0] == "" {
 			log.Fatalf("Missing ORIGIN_ALLOWLIST in environment variables!")
 		}
+		log.Printf("Config loaded: %+v", config)
 	})
 
 	return config

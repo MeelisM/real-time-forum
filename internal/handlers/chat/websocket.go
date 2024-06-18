@@ -39,47 +39,37 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Authentication token is required", http.StatusBadRequest)
 		return
 	}
-
 	userId, username, err := validateToken(token)
 	if err != nil {
 		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
 	}
-
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ws.Close()
-
 	client := &Client{Conn: ws, Send: make(chan []byte), UserId: userId, Username: username, Handler: h}
-
 	mu.Lock()
 	clients[client] = true
 	onlineUsers[userId] = client
 	mu.Unlock()
-
 	log.Printf("User connected: %s", userId)
 	notifyUserStatus(userId, username, "online")
-
 	go handleMessages(client)
-
 	sendInitialOnlineUsers(client)
-
 	for {
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
 			log.Printf("error: %v", err)
 			break
 		}
-
 		var incomingMessage models.Message
 		err = json.Unmarshal(msg, &incomingMessage)
 		if err != nil {
 			log.Printf("error parsing message: %v", err)
 			continue
 		}
-
 		switch incomingMessage.Type {
 		case "chat_message":
 			handleChatMessage(client, incomingMessage)
@@ -89,17 +79,14 @@ func (h *Handler) HandleConnections(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Unknown message type: %s", incomingMessage.Type)
 		}
 	}
-
 	mu.Lock()
 	delete(clients, client)
 	delete(onlineUsers, userId)
 	mu.Unlock()
 	close(client.Send)
-
 	log.Printf("User disconnected: %s", userId)
 	notifyUserStatus(userId, username, "offline")
 }
-
 func handleChatMessage(client *Client, incomingMessage models.Message) {
 	message := models.Message{
 		Id:         uuid.New().String(),
@@ -107,12 +94,10 @@ func handleChatMessage(client *Client, incomingMessage models.Message) {
 		SenderId:   client.UserId,
 		ReceiverId: incomingMessage.ReceiverId,
 	}
-
 	err := client.Handler.ChatService.CreateMessage(&message)
 	if err != nil {
 		log.Printf("error saving message: %v", err)
 	}
-
 	messageData, err := json.Marshal(map[string]interface{}{
 		"type":       "chat_message",
 		"id":         message.Id,
@@ -125,12 +110,10 @@ func handleChatMessage(client *Client, incomingMessage models.Message) {
 		log.Printf("error marshalling message data: %v", err)
 		return
 	}
-
 	if receiver, ok := onlineUsers[message.ReceiverId]; ok {
 		receiver.Send <- messageData
 	}
 }
-
 func handleMessages(client *Client) {
 	for {
 		msg, ok := <-client.Send
@@ -145,7 +128,6 @@ func handleMessages(client *Client) {
 		}
 	}
 }
-
 func HandleBroadcast() {
 	for {
 		msg := <-broadcast
@@ -161,45 +143,36 @@ func HandleBroadcast() {
 		mu.Unlock()
 	}
 }
-
 func notifyUserStatus(userId, username, status string) {
 	statusMessage := fmt.Sprintf(`{"type": "user_status", "userId": "%s", "username": "%s", "status": "%s"}`, userId, username, status)
 	log.Printf("Notify user status: %s", statusMessage)
 	message := []byte(statusMessage)
 	broadcast <- message
 }
-
 func validateToken(tokenString string) (string, string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.LoadConfig().JWTSecret), nil
 	})
-
 	if err != nil || !token.Valid {
 		return "", "", fmt.Errorf("invalid token")
 	}
-
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return "", "", fmt.Errorf("invalid token claims")
 	}
-
 	userId, ok := claims["user_id"].(string)
 	if !ok {
 		return "", "", fmt.Errorf("invalid user ID in token")
 	}
-
 	username, ok := claims["username"].(string)
 	if !ok {
 		return "", "", fmt.Errorf("invalid username in token")
 	}
-
 	return userId, username, nil
 }
-
 func sendInitialOnlineUsers(client *Client) {
 	mu.Lock()
 	defer mu.Unlock()
-
 	var onlineUsersList []map[string]string
 	for _, c := range onlineUsers {
 		onlineUsersList = append(onlineUsersList, map[string]string{
@@ -207,7 +180,6 @@ func sendInitialOnlineUsers(client *Client) {
 			"username": c.Username,
 		})
 	}
-
 	initialUsersMessage, err := json.Marshal(map[string]interface{}{
 		"type":        "initial_online_users",
 		"onlineUsers": onlineUsersList,
@@ -216,17 +188,14 @@ func sendInitialOnlineUsers(client *Client) {
 		log.Printf("error marshalling initial online users: %v", err)
 		return
 	}
-
 	client.Send <- initialUsersMessage
 }
-
 func sendChatHistory(client *Client, userId string) {
 	messages, err := client.Handler.ChatService.GetMessagesByUserID(userId)
 	if err != nil {
 		log.Printf("error fetching chat history: %v", err)
 		return
 	}
-
 	historyMessage, err := json.Marshal(map[string]interface{}{
 		"type":     "chat_history",
 		"messages": messages,
@@ -235,6 +204,5 @@ func sendChatHistory(client *Client, userId string) {
 		log.Printf("error marshalling chat history: %v", err)
 		return
 	}
-
 	client.Send <- historyMessage
 }

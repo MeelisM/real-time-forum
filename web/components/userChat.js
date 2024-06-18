@@ -40,15 +40,37 @@ export async function renderChat() {
   await fetchAllUsers();
   setupWebSocket();
 
-  document.getElementById("send-button").addEventListener("click", (e) => {
-    e.preventDefault();
-    sendMessage();
-  });
+  const sendButton = document.getElementById("send-button");
+  if (sendButton) {
+    sendButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      sendMessage();
+    });
+  } else {
+    console.error("Send button not found!");
+  }
 
-  document.getElementById("back-button").addEventListener("click", (e) => {
-    e.preventDefault();
-    goBackToUserList();
-  });
+  const backButton = document.getElementById("back-button");
+  if (backButton) {
+    backButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      goBackToUserList();
+    });
+  } else {
+    console.error("Back button not found!");
+  }
+
+  const messageInput = document.getElementById("message-input");
+  if (messageInput) {
+    messageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  } else {
+    console.error("Message input not found!");
+  }
 }
 
 function setupWebSocket() {
@@ -93,7 +115,11 @@ function handleWebSocketData(data) {
     case "initial_online_users":
       onlineUsers = data.onlineUsers;
       removeDuplicateUsers();
-      renderOnlineUsers();
+      if (document.getElementById("online-users") && document.getElementById("offline-users")) {
+        renderOnlineUsers();
+      } else {
+        console.error("User list containers not found!");
+      }
       break;
     default:
       console.log("Unknown message type:", data.type);
@@ -146,7 +172,7 @@ async function fetchAllUsers() {
 
 function updateOnlineUsers(data) {
   const { userId, username, status } = data;
-  if (status === "online" && !onlineUsers.some((user) => user.userId === userId)) {
+  if (status === "online" && !onlineUsers.some((user) => user.userId === userId) && userId !== loggedInUserId) {
     onlineUsers.push({ userId, username });
     offlineUsers = offlineUsers.filter((user) => user.userId !== userId);
   } else if (status === "offline") {
@@ -167,16 +193,24 @@ function removeDuplicateUsers() {
 function renderOnlineUsers() {
   const onlineUsersDiv = document.getElementById("online-users");
   const offlineUsersDiv = document.getElementById("offline-users");
+  
+  if (!onlineUsersDiv || !offlineUsersDiv) {
+    console.error("Online or offline users container not found!");
+    return;
+  }
+
   onlineUsersDiv.innerHTML = "";
   offlineUsersDiv.innerHTML = "";
 
-  onlineUsers.forEach((user) => {
-    const userStatus = document.createElement("div");
-    userStatus.setAttribute("data-user-id", user.userId);
-    userStatus.textContent = `${user.username} is online`;
-    userStatus.classList.add("user-status", "online-user");
-    userStatus.addEventListener("click", () => selectUser(user.userId));
-    onlineUsersDiv.appendChild(userStatus);
+  onlineUsers
+    .filter(user => user.userId !== loggedInUserId) // Exclude the logged-in user
+    .forEach((user) => {
+      const userStatus = document.createElement("div");
+      userStatus.setAttribute("data-user-id", user.userId);
+      userStatus.textContent = `${user.username} is online`;
+      userStatus.classList.add("user-status", "online-user");
+      userStatus.addEventListener("click", () => selectUser(user.userId));
+      onlineUsersDiv.appendChild(userStatus);
   });
 
   offlineUsers.forEach((user) => {
@@ -231,15 +265,16 @@ function renderUserList() {
 function renderChatMessages() {
   const chatMessagesDiv = document.getElementById("chat-messages");
   if (chatMessagesDiv) {
-      chatMessagesDiv.innerHTML = messages
-          .filter(message => (message.receiverId === selectedUser && message.senderId === loggedInUserId) ||
-                             (message.senderId === selectedUser && message.receiverId === loggedInUserId))
-          .map(message => `
-              <div class="message">
-                  <strong>${message.senderId === loggedInUserId ? "You" : getUsernameById(message.senderId)}:</strong>
-                  ${message.content}
-              </div>
-          `).join('');
+    chatMessagesDiv.innerHTML = messages
+      .filter(message => (message.receiverId === selectedUser && message.senderId === loggedInUserId) ||
+                         (message.senderId === selectedUser && message.receiverId === loggedInUserId))
+      .map(message => `
+        <div class="message ${message.senderId === loggedInUserId ? 'sent' : 'received'}">
+          <strong>${message.senderId === loggedInUserId ? 'You' : getUsernameById(message.senderId)}:</strong>
+          <p>${message.content}</p>
+        </div>
+      `).join('');
+    scrollToBottom(chatMessagesDiv);
   }
 }
 
@@ -247,6 +282,10 @@ function displayMessage(messageData) {
   messages.push(messageData);
   if ((messageData.receiverId === selectedUser && messageData.senderId === loggedInUserId) ||
       (messageData.senderId === selectedUser && messageData.receiverId === loggedInUserId)) {
-      renderChatMessages();
+    renderChatMessages();
   }
+}
+
+function scrollToBottom(element) {
+  element.scrollTop = element.scrollHeight;
 }
