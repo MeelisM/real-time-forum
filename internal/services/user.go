@@ -14,6 +14,7 @@ import (
 type UserService interface {
 	Create(user *models.User) error
 	ValidateLogin(username, email string) (*models.User, string, error)
+	GetAllUsers() ([]models.User, error)
 }
 
 type UserDatabaseService struct {
@@ -94,4 +95,24 @@ func createToken(userClaims models.UserClaims) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func (uds *UserDatabaseService) GetAllUsers() ([]models.User, error) {
+	rows, err := uds.Database.Query("SELECT id, username FROM users")
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve users: %v", err)
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.Id, &user.Username)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan user: %v", err)
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }
