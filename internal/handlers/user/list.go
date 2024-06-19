@@ -8,8 +8,8 @@ import (
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/models"
 )
 
-func (h *Handler) ListUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.UserService.GetAllUsers()
+func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
+	users, err := h.UserService.GetList()
 	if err != nil {
 		errors.Handle(w, http.StatusInternalServerError, "failed to fetch users", err)
 		return

@@ -8,7 +8,7 @@ import (
 )
 
 func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
-	posts, err := h.PostService.GetAll()
+	posts, err := h.PostService.GetList()
 	if err != nil {
 		errors.Handle(w, http.StatusInternalServerError, "failed to fetch posts", err)
 		return

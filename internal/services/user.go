@@ -14,7 +14,7 @@ import (
 type UserService interface {
 	Create(user *models.User) error
 	ValidateLogin(username, email string) (*models.User, string, error)
-	GetAllUsers() ([]models.User, error)
+	GetList() ([]models.User, error)
 }
 
 type UserDatabaseService struct {
@@ -97,7 +97,7 @@ func createToken(userClaims models.UserClaims) (string, error) {
 	return tokenString, nil
 }
 
-func (uds *UserDatabaseService) GetAllUsers() ([]models.User, error) {
+func (uds *UserDatabaseService) GetList() ([]models.User, error) {
 	rows, err := uds.Database.Query("SELECT id, username FROM users")
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users: %v", err)

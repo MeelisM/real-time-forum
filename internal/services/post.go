@@ -11,7 +11,7 @@ import (
 
 type PostService interface {
 	Create(post *models.Post) error
-	GetAll() ([]models.Post, error)
+	GetList() ([]models.Post, error)
 }
 
 type PostDatabaseService struct {
@@ -42,7 +42,7 @@ func (pds *PostDatabaseService) Create(post *models.Post) error {
 	return nil
 }
 
-func (pds *PostDatabaseService) GetAll() ([]models.Post, error) {
+func (pds *PostDatabaseService) GetList() ([]models.Post, error) {
 	rows, err := pds.Database.Query("SELECT id, title, content, user_id, created_at, updated_at FROM posts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve posts: %v", err)
