@@ -9,7 +9,7 @@ import (
 )
 
 type ChatService interface {
-	CreateMessage(message *models.Message) error
+	Create(message *models.Message) error
 	GetMessagesByUserID(userID string) ([]*models.Message, error)
 }
 
@@ -21,7 +21,7 @@ func NewChatService(db *sql.DB) ChatService {
 	return &ChatDatabaseService{Database: db}
 }
 
-func (cds *ChatDatabaseService) CreateMessage(message *models.Message) error {
+func (cds *ChatDatabaseService) Create(message *models.Message) error {
 	message.CreatedAt = time.Now()
 
 	_, err := cds.Database.Exec(

@@ -94,7 +94,7 @@ func handleChatMessage(client *Client, incomingMessage models.Message) {
 		SenderId:   client.UserId,
 		ReceiverId: incomingMessage.ReceiverId,
 	}
-	err := client.Handler.ChatService.CreateMessage(&message)
+	err := client.Handler.ChatService.Create(&message)
 	if err != nil {
 		log.Printf("error saving message: %v", err)
 	}
