@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"01.kood.tech/git/mmumm/real-time-forum.git/internal/config"
@@ -13,7 +14,7 @@ import (
 
 type UserService interface {
 	Create(user *models.User) error
-	ValidateLogin(username, email string) (*models.User, string, error)
+	ValidateLogin(usernameOrEmail, password string) (*models.User, string, error)
 	GetList() ([]models.User, error)
 }
 
@@ -26,7 +27,6 @@ func NewUserService(db *sql.DB) UserService {
 }
 
 func (uds *UserDatabaseService) Create(user *models.User) error {
-
 	userExists, err := uds.isRegistered(user)
 	if err != nil {
 		return fmt.Errorf("failed to check if user exists: %v", err)
@@ -57,25 +57,49 @@ func (uds *UserDatabaseService) isRegistered(user *models.User) (bool, error) {
 	return count > 0, nil
 }
 
-func (uds *UserDatabaseService) ValidateLogin(username string, email string) (*models.User, string, error) {
+// checkPassword compares the provided password with the hashed password from the database.
+func checkPassword(hashedPassword, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
+}
+
+func (uds *UserDatabaseService) ValidateLogin(usernameOrEmail, password string) (*models.User, string, error) {
 	var user models.User
-	err := uds.Database.QueryRow(`SELECT id, username, password FROM users WHERE username = ? OR email = ?`, username, email).Scan(&user.Id, &user.Username, &user.Password)
+	var err error
+
+	// Check if the input is an email or username
+	isEmail := strings.Contains(usernameOrEmail, "@")
+
+	if isEmail {
+		// Query by email
+		err = uds.Database.QueryRow(`SELECT id, username, email, password FROM users WHERE email = ?`, usernameOrEmail).Scan(&user.Id, &user.Username, &user.Email, &user.Password)
+	} else {
+		// Query by username
+		err = uds.Database.QueryRow(`SELECT id, username, email, password FROM users WHERE username = ?`, usernameOrEmail).Scan(&user.Id, &user.Username, &user.Email, &user.Password)
+	}
+
 	if err != nil {
 		if err == sql.ErrNoRows {
+			fmt.Println("User not found")
 			return nil, "", fmt.Errorf("user not found")
 		} else {
+			fmt.Println("Failed to get user:", err)
 			return nil, "", fmt.Errorf("failed to get user: %v", err)
 		}
+	}
+
+	if !checkPassword(user.Password, password) {
+		return nil, "", fmt.Errorf("invalid login credentials")
 	}
 
 	userClaims := models.UserClaims{
 		Username: user.Username,
 		UserId:   user.Id,
 	}
-	fmt.Println(userClaims)
 
 	token, err := createToken(userClaims)
 	if err != nil {
+		fmt.Println("Failed to create token:", err)
 		return nil, "", fmt.Errorf("failed to create token: %v", err)
 	}
 

@@ -27,3 +27,8 @@ type UserClaims struct {
 	Username string    `json:"username"`
 	UserId   uuid.UUID `json:"userId"`
 }
+
+type LoginRequest struct {
+	UsernameOrEmail string `json:"username_or_email"`
+	Password        string `json:"password"`
+}
