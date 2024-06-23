@@ -16,7 +16,7 @@ export function setupSendButton(sendButtonId, sendMessageCallback) {
     }
   }
   
-  // button to navigate back to user list in chat
+  // button to navigate back to user list in chat window
   export function setupBackButton(backButtonId, goBackCallback) {
     const backButton = document.getElementById(backButtonId);
     if (backButton) {
@@ -29,7 +29,7 @@ export function setupSendButton(sendButtonId, sendMessageCallback) {
     }
   }
   
-  // message input
+  // send messages with enter
   export function setupMessageInput(messageInputId, sendMessageCallback) {
     const messageInput = document.getElementById(messageInputId);
     if (messageInput) {
