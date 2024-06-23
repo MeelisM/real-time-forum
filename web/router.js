@@ -1,5 +1,6 @@
 import LoginView from "./views/login.js";
 import ForumView from "./views/forum.js";
+import RegistrationView from "./views/registration.js";
 
 class Router {
   constructor(routes) {
@@ -41,6 +42,7 @@ class Router {
 const routes = [
   { path: "/", view: LoginView },
   { path: "/forum", view: ForumView, protected: true },
+  { path: "/register", view: RegistrationView },
   { path: "*", view: () => "<h1>404 Not Found</h1>" },
 ];
 
