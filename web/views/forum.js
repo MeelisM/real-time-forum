@@ -1,11 +1,11 @@
 import { ForumPostComponent } from "../components/forumPost.js";
-import { renderChat } from "../components/userChat.js";
+import { ChatComponent } from "../components/userChat.js";
 
 export default async function ForumView() {
   const forumContent = await ForumPostComponent();
 
   setTimeout(() => {
-    renderChat();
+    ChatComponent();
   }, 0);
 
   return `

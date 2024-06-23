@@ -3,8 +3,7 @@ export function LoginComponent() {
   const loginFormHTML = `
     <div id="login-view">
       <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required />
-        <input type="email" id="email" placeholder="Email" required />
+        <input type="text" id="usernameOrEmail" placeholder="Username or Email" required />
         <input type="password" id="password" placeholder="Password" required />
         <button type="submit">Login</button>
       </form>
@@ -23,11 +22,10 @@ export function LoginComponent() {
 
 async function handleLoginSubmit(event) {
   event.preventDefault();
-  const username = document.getElementById("username").value;
-  const email = document.getElementById("email").value;
+  const usernameOrEmail = document.getElementById("usernameOrEmail").value;
   const password = document.getElementById("password").value;
 
-  console.log("Form submitted:", { username, email, password }); // Debugging log
+  console.log("Form submitted:", { usernameOrEmail, password }); // Debugging log
 
   try {
     const response = await fetch("http://localhost:8080/api/user/login", {
@@ -35,7 +33,7 @@ async function handleLoginSubmit(event) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({ username_or_email: usernameOrEmail, password }),
     });
 
     const data = await response.json();
