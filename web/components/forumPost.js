@@ -1,4 +1,3 @@
-// src/components/forumPost.js
 import { fetchPosts } from '../services/post.js';
 
 export async function ForumPostComponent() {
@@ -8,12 +7,13 @@ export async function ForumPostComponent() {
     const postsHtml = posts
       .map(
         (post) => `
-        <div class="post">
-          <h2><a href="#/post/${post.id}">${post.title}</a></h2>
-          <p>${post.content}</p>
-          <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
-        </div>
-      `
+          <div class="post">
+            <h2><a href="#/post/${post.id}">${post.title}</a></h2>
+            <p>${post.content}</p>
+            <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
+            <small>Comments: ${post.commentsCount}</small>
+          </div>
+        `
       )
       .join('');
 

@@ -4,7 +4,7 @@ import { CommentComponent } from './postComment.js';
 export async function PostComponent(postId) {
   try {
     const post = await fetchPostById(postId);
-    const commentsHtml = await CommentComponent(postId);
+    const comments = await CommentComponent(postId);
 
     return `
       <div class="post-view">
@@ -12,10 +12,9 @@ export async function PostComponent(postId) {
           <h2>${post.title}</h2>
           <p>${post.content}</p>
           <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
+          <small>Comments: ${post.commentsCount}</small>
         </div>
-        <div class="comments">
-          ${commentsHtml}
-        </div>
+        ${comments}
       </div>
     `;
   } catch (error) {

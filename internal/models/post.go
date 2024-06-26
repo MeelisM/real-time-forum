@@ -17,5 +17,6 @@ type Post struct {
 
 type PostWithComments struct {
 	Post
-	Comments []*Comment `json:"comments"`
+	CommentsCount int        `json:"commentsCount"`
+	Comments      []*Comment `json:"comments,omitempty"`
 }

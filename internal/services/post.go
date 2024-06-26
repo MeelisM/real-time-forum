@@ -11,8 +11,8 @@ import (
 
 type PostService interface {
 	Create(post *models.Post) error
-	GetList() ([]models.Post, error)
-	GetByID(postID string) (*models.Post, error)
+	GetList() ([]models.PostWithComments, error)
+	GetByID(postID string) (*models.PostWithComments, error)
 }
 
 type PostDatabaseService struct {
@@ -24,7 +24,6 @@ func NewPostService(db *sql.DB) PostService {
 }
 
 func (pds *PostDatabaseService) Create(post *models.Post) error {
-
 	createdAt := time.Now()
 	updatedAt := createdAt
 	post.CreatedAt = createdAt
@@ -43,17 +42,24 @@ func (pds *PostDatabaseService) Create(post *models.Post) error {
 	return nil
 }
 
-func (pds *PostDatabaseService) GetList() ([]models.Post, error) {
-	rows, err := pds.Database.Query("SELECT id, title, content, user_id, created_at, updated_at FROM posts")
+func (pds *PostDatabaseService) GetList() ([]models.PostWithComments, error) {
+	query := `
+		SELECT p.id, p.title, p.content, p.user_id, p.created_at, p.updated_at, COUNT(c.id) AS comments_count
+		FROM posts p
+		LEFT JOIN comments c ON p.id = c.post_id
+		GROUP BY p.id
+	`
+
+	rows, err := pds.Database.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve posts: %v", err)
 	}
 	defer rows.Close()
 
-	var posts []models.Post
+	var posts []models.PostWithComments
 	for rows.Next() {
-		var post models.Post
-		err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt)
+		var post models.PostWithComments
+		err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt, &post.CommentsCount)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan post: %v", err)
 		}
@@ -63,15 +69,23 @@ func (pds *PostDatabaseService) GetList() ([]models.Post, error) {
 	return posts, nil
 }
 
-func (pds *PostDatabaseService) GetByID(postID string) (*models.Post, error) {
-	var post models.Post
-	err := pds.Database.QueryRow("SELECT id, title, content, user_id, created_at, updated_at FROM posts WHERE id = ?", postID).
-		Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt)
+func (pds *PostDatabaseService) GetByID(postID string) (*models.PostWithComments, error) {
+	query := `
+		SELECT p.id, p.title, p.content, p.user_id, p.created_at, p.updated_at, COUNT(c.id) AS comments_count
+		FROM posts p
+		LEFT JOIN comments c ON p.id = c.post_id
+		WHERE p.id = ?
+		GROUP BY p.id
+	`
+
+	var post models.PostWithComments
+	err := pds.Database.QueryRow(query, postID).Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt, &post.CommentsCount)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("post not found")
 		}
 		return nil, fmt.Errorf("failed to retrieve post: %v", err)
 	}
+
 	return &post, nil
 }
