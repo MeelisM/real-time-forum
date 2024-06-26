@@ -1,39 +1,25 @@
+// src/components/forumPost.js
 import { fetchPosts } from '../services/post.js';
-import { fetchComments } from '../services/comment.js';
 
 export async function ForumPostComponent() {
   try {
     const posts = await fetchPosts();
 
-    // Fetch comments for each post
-    const postsWithComments = await Promise.all(posts.map(async (post) => {
-      const comments = await fetchComments(post.id);
-      const commentsHtml = comments
-        .map(
-          (comment) => `
-          <div class="comment">
-            <p>${comment.content}</p>
-            <small>Commented at: ${new Date(comment.createdAt).toLocaleString()}</small>
-          </div>
-        `
-        )
-        .join('');
-
-      return `
+    const postsHtml = posts
+      .map(
+        (post) => `
         <div class="post">
-          <h2>${post.title}</h2>
+          <h2><a href="#/post/${post.id}">${post.title}</a></h2>
           <p>${post.content}</p>
           <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
-          <div class="comments">
-            ${commentsHtml}
-          </div>
         </div>
-      `;
-    }));
+      `
+      )
+      .join('');
 
     return `
       <div>
-        ${postsWithComments.join('')}
+        ${postsHtml}
       </div>
     `;
   } catch (error) {

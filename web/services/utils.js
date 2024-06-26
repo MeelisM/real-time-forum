@@ -22,7 +22,7 @@ export function setupSendButton(sendButtonId, sendMessageCallback) {
     if (backButton) {
       backButton.addEventListener("click", (e) => {
         e.preventDefault();
-        goBackCallback();
+        goBackCallback(); 
       });
     } else {
       console.error("Back button not found!");
