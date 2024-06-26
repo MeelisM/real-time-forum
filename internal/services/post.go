@@ -12,6 +12,7 @@ import (
 type PostService interface {
 	Create(post *models.Post) error
 	GetList() ([]models.Post, error)
+	GetByID(postID string) (*models.Post, error)
 }
 
 type PostDatabaseService struct {
@@ -60,4 +61,17 @@ func (pds *PostDatabaseService) GetList() ([]models.Post, error) {
 	}
 
 	return posts, nil
+}
+
+func (pds *PostDatabaseService) GetByID(postID string) (*models.Post, error) {
+	var post models.Post
+	err := pds.Database.QueryRow("SELECT id, title, content, user_id, created_at, updated_at FROM posts WHERE id = ?", postID).
+		Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("post not found")
+		}
+		return nil, fmt.Errorf("failed to retrieve post: %v", err)
+	}
+	return &post, nil
 }
