@@ -29,6 +29,6 @@ type UserClaims struct {
 }
 
 type LoginRequest struct {
-	UsernameOrEmail string `json:"username_or_email"`
+	UsernameOrEmail string `json:"usernameOrEmail"`
 	Password        string `json:"password"`
 }

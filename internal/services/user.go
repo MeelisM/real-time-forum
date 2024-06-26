@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -57,7 +58,6 @@ func (uds *UserDatabaseService) isRegistered(user *models.User) (bool, error) {
 	return count > 0, nil
 }
 
-// checkPassword compares the provided password with the hashed password from the database.
 func checkPassword(hashedPassword, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return err == nil
@@ -79,11 +79,9 @@ func (uds *UserDatabaseService) ValidateLogin(usernameOrEmail, password string) 
 	}
 
 	if err != nil {
-		if err == sql.ErrNoRows {
-			fmt.Println("User not found")
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, "", fmt.Errorf("user not found")
 		} else {
-			fmt.Println("Failed to get user:", err)
 			return nil, "", fmt.Errorf("failed to get user: %v", err)
 		}
 	}
@@ -126,7 +124,11 @@ func (uds *UserDatabaseService) GetList() ([]models.User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users: %v", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			err = fmt.Errorf("failed to close rows: %v", closeErr)
+		}
+	}()
 
 	var users []models.User
 	for rows.Next() {
@@ -136,6 +138,10 @@ func (uds *UserDatabaseService) GetList() ([]models.User, error) {
 			return nil, fmt.Errorf("failed to scan user: %v", err)
 		}
 		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("iteration error: %v", err)
 	}
 
 	return users, nil
