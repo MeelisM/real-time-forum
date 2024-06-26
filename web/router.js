@@ -1,4 +1,4 @@
-import LoginView from "./views/login.js";
+import LoginView, { mountLogin } from "./views/login.js";
 import ForumView from "./views/forum.js";
 
 class Router {
@@ -16,14 +16,22 @@ class Router {
   async handleRouteChange() {
     const path = window.location.hash.slice(1) || "/";
     const route =
-      this.routes.find((r) => r.path === path) ||
-      this.routes.find((r) => r.path === "*");
+        this.routes.find((r) => r.path === path) ||
+        this.routes.find((r) => r.path === "*");
+
     if (route) {
-      if (route.protected && !this.isAuthenticated()) {
-        window.location.hash = "/";
-        document.getElementById("app").innerHTML = await LoginView();
-      } else {
-        document.getElementById("app").innerHTML = await route.view();
+      const app = document.getElementById("app");
+      if (app) {
+        if (route.protected && !this.isAuthenticated()) {
+          window.location.hash = "/";
+          app.innerHTML = await LoginView();
+          mountLogin();
+        } else {
+          app.innerHTML = await route.view();
+          if (path === "/") {
+            mountLogin();
+          }
+        }
       }
     }
   }

@@ -1,55 +1,54 @@
+// components/loginForm.js
 export function LoginComponent() {
-  // Create the login form HTML
-  const loginFormHTML = `
-    <div id="login-view">
-      <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required />
-        <input type="email" id="email" placeholder="Email" required />
-        <input type="password" id="password" placeholder="Password" required />
-        <button type="submit">Login</button>
-      </form>
+    const loginFormHTML = `
+    <div class="center-container">
+      <div class="login-container">
+          <form class="login-form" id="loginForm">
+              <div class="form-group">
+                  <input type="text" id="user" name="user" placeholder="Email or Username" required>
+              </div>
+              <div class="form-group">
+                  <input type="password" id="password" name="password" placeholder="Password"required>
+              </div>
+              <div class="button-container">
+              <button type="button">Register</button>   
+              <button type="submit">Login</button>  
+              </div>
+          </form>
+      </div>
     </div>
   `;
-
-  setTimeout(() => {
-    const loginForm = document.getElementById("loginForm");
-    if (loginForm) {
-      loginForm.addEventListener("submit", handleLoginSubmit);
-    }
-  }, 0);
-
-  return loginFormHTML;
+    return loginFormHTML;
 }
 
-async function handleLoginSubmit(event) {
-  event.preventDefault();
-  const username = document.getElementById("username").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+export async function handleLoginSubmit(event) {
+    event.preventDefault(); // Prevent default form submission behavior
+    const usernameOrEmail = document.getElementById("user").value;
+    const password = document.getElementById("password").value;
 
-  console.log("Form submitted:", { username, email, password }); // Debugging log
+    console.log("Form submitted:", {usernameOrEmail, password}); // Debugging log
 
-  try {
-    const response = await fetch("http://localhost:8080/api/user/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, email, password }),
-    });
+    try {
+        const response = await fetch("http://localhost:8080/api/user/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({usernameOrEmail, password}),
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    console.log("Login response:", data); // Debugging log
+        console.log("Login response:", data); // Debugging log
 
-    if (data.code === 200) {
-      localStorage.setItem("authToken", data.data.token);
-      window.location.hash = "#/forum";
-    } else {
-      alert(data.message || "Login failed");
+        if (data.code === 200) {
+            localStorage.setItem("authToken", data.data.token);
+            window.location.hash = "#/forum";
+        } else {
+            alert(data.message || "Login failed");
+        }
+    } catch (error) {
+        console.error("Error during login:", error);
+        alert("Login failed. Please try again.");
     }
-  } catch (error) {
-    console.error("Error during login:", error);
-    alert("Login failed. Please try again.");
-  }
 }
