@@ -10,6 +10,7 @@ export async function ForumPostComponent() {
           <div class="post">
             <h2><a href="#/post/${post.id}">${post.title}</a></h2>
             <p>${post.content}</p>
+            <small>Category: ${post.category}</small> <!-- Display category -->
             <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
             <small>Comments: ${post.commentsCount}</small>
           </div>

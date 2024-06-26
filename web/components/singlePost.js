@@ -11,6 +11,7 @@ export async function PostComponent(postId) {
         <div class="post">
           <h2>${post.title}</h2>
           <p>${post.content}</p>
+          <small>Category: ${post.category}</small> <!-- Display category -->
           <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
           <small>Comments: ${post.commentsCount}</small>
         </div>

@@ -64,6 +64,7 @@ func createPostsTable(db *sql.DB) error {
 		title TEXT NOT NULL,
 		content TEXT NOT NULL,
 		user_id UUID NOT NULL,
+		category TEXT NOT NULL, -- Add this line
 		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY(user_id) REFERENCES users(id)

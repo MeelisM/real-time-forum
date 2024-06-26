@@ -24,14 +24,28 @@ func NewPostService(db *sql.DB) PostService {
 }
 
 func (pds *PostDatabaseService) Create(post *models.Post) error {
+	// Validate category
+	validCategories := models.GetCategories()
+	categoryValid := false
+	for _, category := range validCategories {
+		if category == post.Category {
+			categoryValid = true
+			break
+		}
+	}
+	if !categoryValid {
+		return fmt.Errorf("invalid category")
+	}
+
+	// Set timestamps
 	createdAt := time.Now()
 	updatedAt := createdAt
 	post.CreatedAt = createdAt
 	post.UpdatedAt = updatedAt
 
 	_, err := pds.Database.Exec(
-		"INSERT INTO posts (id, title, content, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-		post.Id, post.Title, post.Content, post.UserId, createdAt, updatedAt,
+		"INSERT INTO posts (id, title, content, user_id, category, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		post.Id, post.Title, post.Content, post.UserId, post.Category, createdAt, updatedAt,
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "FOREIGN KEY constraint failed") {
@@ -44,7 +58,7 @@ func (pds *PostDatabaseService) Create(post *models.Post) error {
 
 func (pds *PostDatabaseService) GetList() ([]models.PostWithComments, error) {
 	query := `
-		SELECT p.id, p.title, p.content, p.user_id, p.created_at, p.updated_at, COUNT(c.id) AS comments_count
+		SELECT p.id, p.title, p.content, p.user_id, p.created_at, p.updated_at, p.category, COUNT(c.id) AS comments_count
 		FROM posts p
 		LEFT JOIN comments c ON p.id = c.post_id
 		GROUP BY p.id
@@ -59,7 +73,7 @@ func (pds *PostDatabaseService) GetList() ([]models.PostWithComments, error) {
 	var posts []models.PostWithComments
 	for rows.Next() {
 		var post models.PostWithComments
-		err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt, &post.CommentsCount)
+		err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt, &post.Category, &post.CommentsCount)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan post: %v", err)
 		}
@@ -71,7 +85,7 @@ func (pds *PostDatabaseService) GetList() ([]models.PostWithComments, error) {
 
 func (pds *PostDatabaseService) GetByID(postID string) (*models.PostWithComments, error) {
 	query := `
-		SELECT p.id, p.title, p.content, p.user_id, p.created_at, p.updated_at, COUNT(c.id) AS comments_count
+		SELECT p.id, p.title, p.content, p.user_id, p.created_at, p.updated_at, p.category, COUNT(c.id) AS comments_count
 		FROM posts p
 		LEFT JOIN comments c ON p.id = c.post_id
 		WHERE p.id = ?
@@ -79,7 +93,7 @@ func (pds *PostDatabaseService) GetByID(postID string) (*models.PostWithComments
 	`
 
 	var post models.PostWithComments
-	err := pds.Database.QueryRow(query, postID).Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt, &post.CommentsCount)
+	err := pds.Database.QueryRow(query, postID).Scan(&post.Id, &post.Title, &post.Content, &post.UserId, &post.CreatedAt, &post.UpdatedAt, &post.Category, &post.CommentsCount)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("post not found")
