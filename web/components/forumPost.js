@@ -1,43 +1,26 @@
-export async function fetchPosts() {
-  const token = localStorage.getItem("authToken");
-
-  if (!token) {
-    throw new Error("User is not authenticated");
-  }
-
-  const response = await fetch("http://localhost:8080/api/post", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const data = await response.json();
-  if (data.code !== 200) {
-    throw new Error(data.message || "Failed to fetch posts");
-  }
-
-  return data.data;
-}
+import { fetchPosts } from '../services/post.js';
 
 export async function ForumPostComponent() {
   try {
     const posts = await fetchPosts();
-    return `
-      <div>
-        ${posts
-          .map(
-            (post) => `
+
+    const postsHtml = posts
+      .map(
+        (post) => `
           <div class="post">
-            <h2>${post.title}</h2>
+            <h2><a href="#/post/${post.id}">${post.title}</a></h2>
             <p>${post.content}</p>
-            <small>Posted at: ${new Date(
-              post.createdAt
-            ).toLocaleString()}</small>
+            <small>Category: ${post.category}</small> <!-- Display category -->
+            <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
+            <small>Comments: ${post.commentsCount}</small>
           </div>
         `
-          )
-          .join("")}
+      )
+      .join('');
+
+    return `
+      <div>
+        ${postsHtml}
       </div>
     `;
   } catch (error) {

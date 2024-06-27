@@ -1,5 +1,7 @@
-import LoginView, { mountLogin } from "./views/login.js";
+import LoginView from "./views/login.js";
 import ForumView from "./views/forum.js";
+import RegistrationView from "./views/registration.js";
+import PostView from "./views/post.js"; // Import the PostView
 
 class Router {
   constructor(routes) {
@@ -15,25 +17,35 @@ class Router {
 
   async handleRouteChange() {
     const path = window.location.hash.slice(1) || "/";
-    const route =
-        this.routes.find((r) => r.path === path) ||
-        this.routes.find((r) => r.path === "*");
+    const route = this.matchRoute(path);
 
     if (route) {
-      const app = document.getElementById("app");
-      if (app) {
-        if (route.protected && !this.isAuthenticated()) {
-          window.location.hash = "/";
-          app.innerHTML = await LoginView();
-          mountLogin();
-        } else {
-          app.innerHTML = await route.view();
-          if (path === "/") {
-            mountLogin();
-          }
-        }
+      if (route.protected && !this.isAuthenticated()) {
+        window.location.hash = "/";
+        document.getElementById("app").innerHTML = await LoginView();
+      } else {
+        document.getElementById("app").innerHTML = await route.view(this.getParams(route, path));
       }
     }
+  }
+
+  matchRoute(path) {
+    return this.routes.find((route) => {
+      const routePath = route.path
+        .replace(/:[^\s/]+/g, "([\\w-]+)") // Replace :id with a regex capture group
+        .replace(/\//g, "\\/");
+      const regex = new RegExp(`^${routePath}$`);
+      return regex.test(path);
+    });
+  }
+
+  getParams(route, path) {
+    const values = path.match(new RegExp(route.path.replace(/:[^\s/]+/g, "([\\w-]+)").replace(/\//g, "\\/")));
+    const keys = [...route.path.matchAll(/:([^\s/]+)/g)].map(result => result[1]);
+    return keys.reduce((params, key, index) => {
+      params[key] = values[index + 1];
+      return params;
+    }, {});
   }
 
   isAuthenticated() {
@@ -49,6 +61,8 @@ class Router {
 const routes = [
   { path: "/", view: LoginView },
   { path: "/forum", view: ForumView, protected: true },
+  { path: "/register", view: RegistrationView },
+  { path: "/post/:id", view: PostView, protected: true }, // Correctly define the dynamic route
   { path: "*", view: () => "<h1>404 Not Found</h1>" },
 ];
 
