@@ -1,12 +1,12 @@
-import { fetchPosts } from '../services/post.js';
+import {fetchPosts} from '../services/post.js';
 
 export async function ForumPostComponent() {
-  try {
-    const posts = await fetchPosts();
+    try {
+        const posts = await fetchPosts();
 
-    const postsHtml = posts
-      .map(
-        (post) => `
+        const postsHtml = posts
+            .map(
+                (post) => `
           <div class="post">
             <h2><a href="#/post/${post.id}">${post.title}</a></h2>
             <p>${post.content}</p>
@@ -15,19 +15,19 @@ export async function ForumPostComponent() {
             <small>Comments: ${post.commentsCount}</small>
           </div>
         `
-      )
-      .join('');
+            )
+            .join('');
 
-    return `
+        return `
       <div>
         ${postsHtml}
       </div>
     `;
-  } catch (error) {
-    return `
+    } catch (error) {
+        return `
       <div>
         <p>Error: ${error.message}</p>
       </div>
     `;
-  }
+    }
 }

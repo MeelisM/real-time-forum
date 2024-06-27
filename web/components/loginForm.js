@@ -2,8 +2,8 @@
 export function LoginComponent() {
     const loginFormHTML = `
     <div class="center-container">
-      <div class="login-container">
-          <form class="login-form" id="loginForm">
+      <div class="user-container">
+          <form class="user-form" id="loginForm">
               <div class="form-group">
                   <input type="text" id="user" name="user" placeholder="Email or Username" required>
               </div>
@@ -11,7 +11,7 @@ export function LoginComponent() {
                   <input type="password" id="password" name="password" placeholder="Password"required>
               </div>
               <div class="button-container">
-              <button type="button">Register</button>   
+              <button type="button" id="register">Register</button>   
               <button type="submit">Login</button>  
               </div>
           </form>

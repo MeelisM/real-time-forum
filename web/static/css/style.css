@@ -19,7 +19,7 @@ body {
     height: 100vh;
 }
 
-.login-container {
+.user-container {
     background-color: #ffffff;
     padding: 1.5rem;
     border-radius: 15px;
@@ -27,7 +27,7 @@ body {
     width: 15%;
 }
 
-.login-form {
+.user-form {
     display: flex;
     flex-direction: column;
 }
@@ -225,3 +225,36 @@ body {
 .offline-user {
     color: red;
 }
+
+.form-group select {
+    background-color: #ffffff;
+    color: #333;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.form-group option {
+    color: #333;
+    background-color: #fff;
+    padding: 0.5rem;
+}
+
+.form-group option:disabled {
+    color: #999;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #fff;
+    background-size: 16px;
+}
+
+
