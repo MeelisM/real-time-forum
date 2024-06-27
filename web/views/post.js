@@ -14,7 +14,7 @@ export default async function PostView(params) {
     return `
       <div>
         ${postHtml}
-        <div id="chat-container"></div> <!-- Chat container where the chat UI will be rendered -->
+        <div id="chat-container" style="display: none;"></div> <!-- Chat container where the chat UI will be rendered -->
       </div>
     `;
   } catch (error) {

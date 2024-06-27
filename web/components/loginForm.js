@@ -1,4 +1,3 @@
-// components/loginForm.js
 export function LoginComponent() {
     const loginFormHTML = `
     <div class="center-container">

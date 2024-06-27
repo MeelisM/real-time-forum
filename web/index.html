@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<title>SPA Forum</title>
-	<link rel="stylesheet" href="static/css/style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SPA Forum</title>
+  <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
-<div id="app"></div>
-<script type="module" src="app.js"></script>
+  <nav id="main-nav">
+    <ul>
+      <li><a href="#/forum">Forum</a></li>
+      <li><a href="#" id="chat-link">Chat</a></li>
+      <li id="logout-link"><a href="#/" onclick="logout()">Logout</a></li>
+    </ul>
+  </nav>
+  <div id="app"></div>
+  <div id="chat-container" style="display: none;"></div> <!-- Ensure chat container is present in the HTML -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>
