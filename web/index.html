@@ -9,9 +9,11 @@
 <body>
   <nav id="main-nav">
     <ul>
-      <li><a href="#/forum">Forum</a></li>
-      <li><a href="#" id="chat-link">Chat</a></li>
-      <li id="logout-link"><a href="#/" onclick="logout()">Logout</a></li>
+      <li class="logo"><a href="#/forum"><img src="static/img/logo.png" alt="Logo"></a></li>
+      <div class="nav-right">
+        <li><a href="#" id="chat-link"><img src="static/img/chat.png" alt="Chat"></a></li>
+        <li id="logout-link"><a href="#/" onclick="logout()"><img src="static/img/logout.png" alt="Logout"></a></li>
+      </div>
     </ul>
   </nav>
   <div id="app"></div>

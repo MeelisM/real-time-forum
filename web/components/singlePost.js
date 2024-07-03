@@ -9,11 +9,13 @@ export async function PostComponent(postId) {
     return `
       <div class="post-view">
         <div class="post">
-          <h2>${post.title}</h2>
-          <p>${post.content}</p>
-          <small>Category: ${post.category}</small> <!-- Display category -->
-          <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
-          <small>Comments: ${post.commentsCount}</small>
+          <h2 class="post-title">${post.title}</h2>
+          <div class="post-meta">
+            <small>Category: ${post.category}</small>
+            <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
+          </div>
+          <p class="post-content">${post.content}</p>
+          <small class="comment-count">Comments: ${post.commentsCount}</small>
         </div>
         ${comments}
       </div>
