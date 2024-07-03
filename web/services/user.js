@@ -1,4 +1,4 @@
-import state from './state.js';
+import state, { resetChatComponent } from './state.js';
 
 export async function fetchAllUsers() {
   try {
@@ -59,12 +59,14 @@ export function renderOnlineUsers() {
   onlineUsersDiv.innerHTML = "";
   offlineUsersDiv.innerHTML = "";
 
+  const profileImagePath = "./static/img/defaultprofile.png"; // Relative path to the profile image
+
   state.onlineUsers
     .filter(user => user.userId !== state.loggedInUserId) // Exclude the logged-in user
     .forEach((user) => {
       const userStatus = document.createElement("div");
       userStatus.setAttribute("data-user-id", user.userId);
-      userStatus.textContent = `${user.username} is online`;
+      userStatus.innerHTML = `<img src="${profileImagePath}" alt="Profile Picture">${user.username} is online`;
       userStatus.classList.add("user-status", "online-user");
       userStatus.addEventListener("click", () => selectUser(user.userId));
       onlineUsersDiv.appendChild(userStatus);
@@ -73,7 +75,7 @@ export function renderOnlineUsers() {
   state.offlineUsers.forEach((user) => {
     const userStatus = document.createElement("div");
     userStatus.setAttribute("data-user-id", user.userId);
-    userStatus.textContent = `${user.username} is offline`;
+    userStatus.innerHTML = `<img src="${profileImagePath}" alt="Profile Picture">${user.username} is offline`;
     userStatus.classList.add("user-status", "offline-user");
     userStatus.addEventListener("click", () => selectUser(user.userId));
     offlineUsersDiv.appendChild(userStatus);
@@ -84,12 +86,21 @@ export function selectUser(userID) {
   const user = [...state.onlineUsers, ...state.offlineUsers].find((user) => user.userId === userID);
   state.selectedUser = userID;
   document.getElementById("chat-header").innerHTML = `
-    <button id="back-button">Back</button>
-    <span>${user.username}</span>
+    <span class="chat-title">${user.username}</span>
+    <div class="header-buttons">
+      <button id="back-button" class="button back-button"></button>
+      <button id="close-chat-button" class="button close-button"></button>
+    </div>
   `;
+  document.getElementById("back-button").style.display = "block";
   document.getElementById("back-button").addEventListener("click", (e) => {
     e.preventDefault();
     goBackToUserList();
+  });
+  document.getElementById("close-chat-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("chat-container").style.display = "none";
+    resetChatComponent();
   });
   document.getElementById("chat-messages-container").style.display = "flex";
   document.getElementById("user-list-container").style.display = "none";
@@ -109,13 +120,36 @@ export function selectUser(userID) {
 
 export function goBackToUserList() {
   state.selectedUser = null;
-  document.getElementById("chat-header").innerHTML = `<span>Chat</span>`;
+  document.getElementById("chat-header").innerHTML = `
+    <span class="chat-title">Chat</span>
+    <div class="header-buttons">
+      <button id="close-chat-button" class="button close-button"></button>
+    </div>
+  `;
+  document.getElementById("close-chat-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("chat-container").style.display = "none";
+    resetChatComponent();
+  });
   renderUserList();
 }
 
 export function renderUserList() {
-  document.getElementById("chat-messages-container").style.display = "none";
-  document.getElementById("user-list-container").style.display = "block";
+  const chatMessagesContainer = document.getElementById("chat-messages-container");
+  const userListContainer = document.getElementById("user-list-container");
+
+  if (chatMessagesContainer) {
+    chatMessagesContainer.style.display = "none";
+  } else {
+    console.error("Chat messages container not found!");
+  }
+
+  if (userListContainer) {
+    userListContainer.style.display = "block";
+  } else {
+    console.error("User list container not found!");
+  }
+
   renderOnlineUsers();
 }
 

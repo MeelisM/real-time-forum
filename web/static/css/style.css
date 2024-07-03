@@ -98,14 +98,14 @@ header img {
    Live chat Style
    ========================================================================== */
 
-#chat-container {
+   #chat-container {
     display: flex;
     flex-direction: column;
     width: 400px;
     height: 50vh;
     position: fixed;
     right: 20px;
-    bottom: 60px;
+    bottom: 120px; 
     background-color: #fff;
     border-left: 1px solid #ccc;
     box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.1);
@@ -120,12 +120,38 @@ header img {
     align-items: center;
 }
 
-#chat-header button {
+#chat-header .chat-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+#chat-header .header-buttons {
+    display: flex;
+    align-items: center;
+}
+
+#chat-header .button {
     background-color: transparent;
     border: none;
     color: #fff;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 2.25rem; 
+    font-weight: bold; 
+    margin-left: 10px;
+}
+
+#chat-header .button:hover {
+    color: #ddd;
+}
+
+#chat-header .back-button::before {
+    content: '←'; 
+    font-size: 2.25rem; 
+}
+
+#chat-header .close-button::before {
+    content: '×'; 
+    font-size: 2.25rem; 
 }
 
 #chat-body {
@@ -139,6 +165,9 @@ header img {
 #user-list-container {
     padding: 10px;
     overflow-y: auto;
+    flex: 1; 
+    max-height: calc(100% - 20px); 
+    border-bottom: 1px solid #ccc;
 }
 
 #chat-messages-container {
@@ -150,6 +179,40 @@ header img {
 
 #online-users, #offline-users {
     padding: 10px;
+}
+
+.user-status {
+    padding: 10px; 
+    margin-bottom: 10px;  
+    cursor: pointer;
+    border-radius: 8px;  
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem; 
+}
+
+.user-status img {
+    border-radius: 50%;
+    width: 60px;  
+    height: 60px;  
+    margin-right: 15px;  
+}
+
+.user-status:hover {
+    background-color: #f0f0f0;
+}
+
+.selected {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.online-user {
+    color: green;
+}
+
+.offline-user {
+    color: red;
 }
 
 #chat-messages {
@@ -168,6 +231,15 @@ header img {
     border-radius: 8px;
     max-width: 70%;
     word-wrap: break-word;
+    display: flex;
+    align-items: center;
+}
+
+.message img {  
+    border-radius: 50%;
+    width: 60px;  
+    height: 60px; 
+    margin-right: 10px;
 }
 
 .message p {
@@ -222,29 +294,9 @@ header img {
     background-color: #0056b3;
 }
 
-.user-status {
-    padding: 5px;
-    margin-bottom: 5px;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.user-status:hover {
-    background-color: #f0f0f0;
-}
-
-.selected {
-    background-color: #007bff;
-    color: #fff;
-}
-
-.online-user {
-    color: green;
-}
-
-.offline-user {
-    color: red;
-}
+/* ==========================================================================
+   Form Styles
+   ========================================================================== */
 
 .form-group select {
     background-color: #ffffff;
@@ -276,6 +328,7 @@ header img {
     background-color: #fff;
     background-size: 16px;
 }
+
 
 /* ==========================================================================
    Page Views style
