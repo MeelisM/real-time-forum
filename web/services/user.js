@@ -59,7 +59,7 @@ export function renderOnlineUsers() {
   onlineUsersDiv.innerHTML = "";
   offlineUsersDiv.innerHTML = "";
 
-  const profileImagePath = "./static/img/defaultprofile.png"; // Relative path to the profile image
+  const profileImagePath = "./static/img/defaultprofile.png"; 
 
   state.onlineUsers
     .filter(user => user.userId !== state.loggedInUserId) // Exclude the logged-in user
@@ -102,6 +102,9 @@ export function selectUser(userID) {
     document.getElementById("chat-container").style.display = "none";
     resetChatComponent();
   });
+  const chatContainer = document.getElementById("chat-container");
+  chatContainer.classList.add('active'); 
+  chatContainer.classList.remove('initial'); 
   document.getElementById("chat-messages-container").style.display = "flex";
   document.getElementById("user-list-container").style.display = "none";
   document.getElementById("message-input").placeholder = `Message to ${user.username}`;
@@ -131,6 +134,9 @@ export function goBackToUserList() {
     document.getElementById("chat-container").style.display = "none";
     resetChatComponent();
   });
+  const chatContainer = document.getElementById("chat-container");
+  chatContainer.classList.add('initial'); 
+  chatContainer.classList.remove('active'); 
   renderUserList();
 }
 
@@ -152,6 +158,7 @@ export function renderUserList() {
 
   renderOnlineUsers();
 }
+
 
 export function getUsernameById(userId) {
   const user = [...state.onlineUsers, ...state.offlineUsers].find(user => user.userId === userId);

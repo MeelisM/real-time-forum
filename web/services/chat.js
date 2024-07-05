@@ -51,10 +51,12 @@ export function initializeChatButton(ChatComponent) {
       const chatContainer = document.getElementById("chat-container");
       if (!state.chatInitialized) {
         chatContainer.style.display = "block";
+        chatContainer.classList.add('initial'); // Add the initial class
         ChatComponent();
         state.chatInitialized = true;
       } else {
         chatContainer.style.display = "block";
+        chatContainer.classList.add('initial'); // Ensure initial class is added
       }
     });
   }
