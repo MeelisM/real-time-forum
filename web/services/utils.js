@@ -60,3 +60,47 @@ export function setupMessageInput(messageInputId, sendMessageCallback) {
     console.error("Message input not found!");
   }
 }
+
+// universal picture uploading function
+export async function uploadPicture(formData, type) {
+  try {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`http://localhost:8080/api/${type}/picture`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Error uploading ${type} picture:`, error);
+    throw error;
+  }
+}
+
+export async function handlePictureSubmit(event, type) {
+  event.preventDefault();
+
+  const formData = new FormData(event.target);
+  const uploadError = document.getElementById(`${type}-upload-error`);
+  const uploadSuccess = document.getElementById(`${type}-upload-success`);
+
+  try {
+    const response = await uploadPicture(formData, type);
+    if (response.code === 200) {
+      uploadSuccess.style.display = 'block';
+      uploadError.style.display = 'none';
+    } else {
+      uploadError.innerText = response.message || `Failed to upload ${type} picture`;
+      uploadError.style.display = 'block';
+      uploadSuccess.style.display = 'none';
+    }
+  } catch (error) {
+    console.error(`Error uploading ${type} picture:`, error);
+    uploadError.innerText = `Failed to upload ${type} picture. Please try again.`;
+    uploadError.style.display = 'block';
+    uploadSuccess.style.display = 'none';
+  }
+}

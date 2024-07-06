@@ -3,6 +3,7 @@ import ForumView from "./views/forum.js";
 import RegistrationView from "./views/registration.js";
 import PostView from "./views/post.js";
 import NewPostView from "./views/newPost.js";
+import ProfileView from "./views/profile.js";
 
 class Router {
   constructor(routes) {
@@ -79,12 +80,13 @@ class Router {
 }
 
 const routes = [
-  {path: "/", view: LoginView},
-  {path: "/forum", view: ForumView, protected: true},
-  {path: "/register", view: RegistrationView},
-  {path: "/post/:id", view: PostView, protected: true},
-  {path: "/newpost", view: NewPostView, protected: true}, // Add new post route
-  {path: "*", view: () => "<h1>404 Not Found</h1>"},
+  { path: "/", view: LoginView },
+  { path: "/forum", view: ForumView, protected: true },
+  { path: "/register", view: RegistrationView },
+  { path: "/post/:id", view: PostView, protected: true },
+  { path: "/newpost", view: NewPostView, protected: true },
+  { path: "/profile", view: ProfileView, protected: true }, 
+  { path: "*", view: () => "<h1>404 Not Found</h1>" },
 ];
 
 export default new Router(routes);

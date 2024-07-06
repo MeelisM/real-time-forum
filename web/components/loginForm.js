@@ -1,3 +1,5 @@
+// src/components/loginForm.js
+
 export function LoginComponent() {
     const loginFormHTML = `
     <div class="center-container">
@@ -23,7 +25,6 @@ export function LoginComponent() {
     return loginFormHTML;
 }
 
-
 export async function handleLoginSubmit(event) {
     event.preventDefault();
     const usernameOrEmail = document.getElementById("user").value;
@@ -46,8 +47,13 @@ export async function handleLoginSubmit(event) {
 
         if (data.code === 200) {
             const userId = data.data.id;
+            const username = usernameOrEmail; 
             localStorage.setItem("authToken", data.data.token);
-            localStorage.setItem("userId", userId); 
+            localStorage.setItem("userId", userId);
+            localStorage.setItem("username", username); 
+            
+            console.log("Saved username:", localStorage.getItem("username")); // Debugging log
+
             window.location.hash = "#/forum";
         } else {
             alert(data.message || "Login failed");
