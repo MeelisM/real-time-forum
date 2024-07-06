@@ -21,11 +21,11 @@ export function LoginComponent() {
 }
 
 export async function handleLoginSubmit(event) {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault();
     const usernameOrEmail = document.getElementById("user").value;
     const password = document.getElementById("password").value;
 
-    console.log("Form submitted:", {usernameOrEmail, password}); // Debugging log
+    console.log("Form submitted:", { usernameOrEmail, password }); // Debugging log
 
     try {
         const response = await fetch("http://localhost:8080/api/user/login", {
@@ -33,7 +33,7 @@ export async function handleLoginSubmit(event) {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({usernameOrEmail, password}),
+            body: JSON.stringify({ usernameOrEmail, password }),
         });
 
         const data = await response.json();
@@ -41,7 +41,9 @@ export async function handleLoginSubmit(event) {
         console.log("Login response:", data); // Debugging log
 
         if (data.code === 200) {
+            const userId = data.data.id;
             localStorage.setItem("authToken", data.data.token);
+            localStorage.setItem("userId", userId); 
             window.location.hash = "#/forum";
         } else {
             alert(data.message || "Login failed");
@@ -51,3 +53,4 @@ export async function handleLoginSubmit(event) {
         alert("Login failed. Please try again.");
     }
 }
+

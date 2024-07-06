@@ -1,8 +1,8 @@
 import { fetchPosts } from '../services/post.js';
 
 let allPosts = [];
+let isLoading = false;
 let currentPage = 1;
-const postsPerPage = 4;
 
 export async function ForumPostComponent() {
   try {
@@ -10,10 +10,7 @@ export async function ForumPostComponent() {
       allPosts = await fetchPosts();
     }
 
-    const totalPages = Math.ceil(allPosts.length / postsPerPage);
-    const paginatedPosts = allPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
-
-    const postsHtml = paginatedPosts
+    const postsHtml = allPosts
       .map(
         (post) => `
           <div class="post" onclick="location.href='#/post/${post.id}'">
@@ -32,11 +29,6 @@ export async function ForumPostComponent() {
     return `
       <div id="forum-view">
         ${postsHtml}
-        <div id="pagination-controls">
-          <button id="prev-button" onclick="prevPage()" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
-          <span id="page-info">Page ${currentPage} of ${totalPages}</span>
-          <button id="next-button" onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
-        </div>
       </div>
     `;
   } catch (error) {
@@ -61,12 +53,49 @@ function getCategoryClass(category) {
   }
 }
 
-window.nextPage = async function() {
-  currentPage++;
-  document.getElementById('forum-view').innerHTML = await ForumPostComponent();
-};
+document.addEventListener('DOMContentLoaded', () => {
+  const forumView = document.getElementById('forum-view');
+  if (forumView) {
+    forumView.addEventListener('scroll', handleScroll);
+  }
+});
 
-window.prevPage = async function() {
-  currentPage--;
-  document.getElementById('forum-view').innerHTML = await ForumPostComponent();
-};
+async function handleScroll() {
+  const forumView = document.getElementById('forum-view');
+  if (forumView.scrollTop + forumView.clientHeight >= forumView.scrollHeight - 5 && !isLoading) {
+    isLoading = true;
+    currentPage++;
+    await loadMorePosts();
+    isLoading = false;
+  }
+}
+
+async function loadMorePosts() {
+  try {
+    const newPosts = await fetchPosts(currentPage);
+    allPosts = [...allPosts, ...newPosts];
+
+    const postsHtml = allPosts
+      .map(
+        (post) => `
+          <div class="post" onclick="location.href='#/post/${post.id}'">
+            <div class="post-header">
+              <div class="post-category ${getCategoryClass(post.category)}">${post.category}</div>
+              <h2 class="post-title">${post.title}</h2>
+              <div class="post-meta">Posted at: ${new Date(post.createdAt).toLocaleString()}</div>
+            </div>
+            <p class="post-content">${post.content}</p>
+            <small class="comment-count">Comments: ${post.commentsCount}</small>
+          </div>
+        `
+      )
+      .join('');
+
+    const forumView = document.getElementById('forum-view');
+    if (forumView) {
+      forumView.innerHTML += postsHtml;
+    }
+  } catch (error) {
+    console.error('Error loading more posts:', error);
+  }
+}
