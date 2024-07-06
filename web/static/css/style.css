@@ -43,21 +43,37 @@ body {
 /* ==========================================================================
    Login and registration styles
    ========================================================================== */
-.center-container {
+   .center-container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
 }
 
+.logo-container {
+    margin-bottom: 1.95rem;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.logo-container img {
+    width: 100%;
+    max-width: 520px; 
+    height: auto;
+}
 
 .user-container {
     background-color: #ffffff;
-    padding: 1.5rem;
-    border-radius: 15px;
-    box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.1);
+    padding: 1.95rem; 
+    border-radius: 19.5px; 
+    box-shadow: 19.5px 19.5px 0 rgba(0, 0, 0, 0.1);
+    border: 2.6px solid #ccc; 
     width: 100%;
-    max-width: 400px; 
+    max-width: 520px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .user-form {
@@ -67,34 +83,34 @@ body {
 }
 
 .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.3rem; 
     color: #333; 
     width: 100%;
 }
 
-
 .form-group input, .form-group select {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 0.65rem; 
+    border: 1.3px solid #ccc; 
+    border-radius: 5.2px; 
+    font-size: 1.3rem;
 }
 
 .button-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1rem;
+    gap: 1.3rem; 
 }
 
 .button-container button {
-    padding: 0.5rem;
+    padding: 0.65rem; 
     border: none;
     width: 100%;
-    border-radius: 4px;
+    border-radius: 5.2px; 
     background-color: #0258bc;
     color: white;
-    font-size: 1rem;
+    font-size: 1.3rem; 
     cursor: pointer;
     transition: background-color 0.3s;
 }
@@ -111,22 +127,10 @@ body {
     background-color: #033e00;
 }
 
-header {
-    background-color: #3b5998;
-    padding: 20px 0;
-    text-align: center;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-}
-
-header img {
-    width: 100%;
-    max-width: 500px;
-    height: auto;
+.user-form label {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    display: block;
 }
 
 
