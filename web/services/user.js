@@ -15,7 +15,8 @@ export async function fetchAllUsers() {
     if (data.code === 200 && data.data && Array.isArray(data.data.data)) {
       state.offlineUsers = data.data.data.map(user => ({
         userId: user.id,
-        username: user.username
+        username: user.username,
+        profilePictureURL: user.profilePictureURL 
       }));
     } else {
       console.error("Failed to fetch users or data format is incorrect:", data.message);
@@ -28,14 +29,14 @@ export async function fetchAllUsers() {
 }
 
 export function updateOnlineUsers(data) {
-  const { userId, username, status } = data;
+  const { userId, username, profilePictureURL, status } = data;
   if (status === "online" && !state.onlineUsers.some((user) => user.userId === userId) && userId !== state.loggedInUserId) {
-    state.onlineUsers.push({ userId, username });
+    state.onlineUsers.push({ userId, username, profilePictureURL });
     state.offlineUsers = state.offlineUsers.filter((user) => user.userId !== userId);
   } else if (status === "offline") {
     state.onlineUsers = state.onlineUsers.filter((user) => user.userId !== userId);
     if (!state.offlineUsers.some((user) => user.userId === userId)) {
-      state.offlineUsers.push({ userId, username });
+      state.offlineUsers.push({ userId, username, profilePictureURL });
     }
   }
   renderOnlineUsers();
@@ -50,7 +51,7 @@ export function removeDuplicateUsers() {
 export function renderOnlineUsers() {
   const onlineUsersDiv = document.getElementById("online-users");
   const offlineUsersDiv = document.getElementById("offline-users");
-  
+
   if (!onlineUsersDiv || !offlineUsersDiv) {
     console.error("Online or offline users container not found!");
     return;
@@ -59,13 +60,16 @@ export function renderOnlineUsers() {
   onlineUsersDiv.innerHTML = "";
   offlineUsersDiv.innerHTML = "";
 
-  const profileImagePath = "./static/img/defaultprofile.png"; 
-
   state.onlineUsers
     .filter(user => user.userId !== state.loggedInUserId) // Exclude the logged-in user
     .forEach((user) => {
+      console.log(`User: ${user.username}, Profile Picture URL: ${user.profilePictureURL}`);
+
       const userStatus = document.createElement("div");
       userStatus.setAttribute("data-user-id", user.userId);
+
+      const profileImagePath = user.profilePictureURL ? `./${user.profilePictureURL}` : "./static/img/defaultprofile.png";
+
       userStatus.innerHTML = `<img src="${profileImagePath}" alt="Profile Picture">${user.username} is online`;
       userStatus.classList.add("user-status", "online-user");
       userStatus.addEventListener("click", () => selectUser(user.userId));
@@ -73,8 +77,13 @@ export function renderOnlineUsers() {
   });
 
   state.offlineUsers.forEach((user) => {
+    console.log(`User: ${user.username}, Profile Picture URL: ${user.profilePictureURL}`);
+
     const userStatus = document.createElement("div");
     userStatus.setAttribute("data-user-id", user.userId);
+
+    const profileImagePath = user.profilePictureURL ? `./${user.profilePictureURL}` : "./static/img/defaultprofile.png";
+
     userStatus.innerHTML = `<img src="${profileImagePath}" alt="Profile Picture">${user.username} is offline`;
     userStatus.classList.add("user-status", "offline-user");
     userStatus.addEventListener("click", () => selectUser(user.userId));
@@ -158,7 +167,6 @@ export function renderUserList() {
 
   renderOnlineUsers();
 }
-
 
 export function getUsernameById(userId) {
   const user = [...state.onlineUsers, ...state.offlineUsers].find(user => user.userId === userId);

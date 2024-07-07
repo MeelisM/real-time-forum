@@ -34,19 +34,15 @@ export async function ChatComponent() {
     </div>
   `;
 
-  // Fetch all users and set up WebSocket
   await fetchAllUsers();
   setupWebSocket();
 
-  // Set up the send button, back button, and message input
   setupSendButton("send-button", sendMessage);
   setupBackButton("back-button", goBackToUserList);
   setupMessageInput("message-input", sendMessage);
 
-  // Add event listener to the close button to hide the chat and reset the component
   setupCloseButton("close-chat-button");
 
-  // Initialize the chat button to open the chat
   initializeChatButton(ChatComponent);
-  renderUserList(); // Ensure the user list is rendered initially
+  renderUserList(); 
 }

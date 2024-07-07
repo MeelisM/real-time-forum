@@ -226,6 +226,37 @@ body {
     display: block;
 }
 
+/* Styles for Profile Picture Selection */
+.profile-pic-options {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.profile-pic-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.profile-pic-option img {
+    width: 90px; /* 1.5 times bigger */
+    height: 90px; /* 1.5 times bigger */
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: border-color 0.3s;
+}
+
+.profile-pic-option input[type="radio"] {
+    display: none;
+}
+
+.profile-pic-option input[type="radio"]:checked + img {
+    border-color: #0258bc;
+}
+
 
 /* ==========================================================================
    Live chat Style

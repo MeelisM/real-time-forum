@@ -1,4 +1,3 @@
-// src/components/loginForm.js
 
 export function LoginComponent() {
     const loginFormHTML = `

@@ -61,46 +61,25 @@ export function setupMessageInput(messageInputId, sendMessageCallback) {
   }
 }
 
-// universal picture uploading function
-export async function uploadPicture(formData, type) {
+// fetching profile pictures from backend
+export async function fetchProfilePictures() {
   try {
-    const token = localStorage.getItem('authToken');
-    const response = await fetch(`http://localhost:8080/api/${type}/picture`, {
-      method: "POST",
+    const response = await fetch('http://localhost:8080/api/user/profile_pictures', {
+      method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`
+        "Content-Type": "application/json",
       },
-      body: formData
     });
 
-    return await response.json();
-  } catch (error) {
-    console.error(`Error uploading ${type} picture:`, error);
-    throw error;
-  }
-}
-
-export async function handlePictureSubmit(event, type) {
-  event.preventDefault();
-
-  const formData = new FormData(event.target);
-  const uploadError = document.getElementById(`${type}-upload-error`);
-  const uploadSuccess = document.getElementById(`${type}-upload-success`);
-
-  try {
-    const response = await uploadPicture(formData, type);
-    if (response.code === 200) {
-      uploadSuccess.style.display = 'block';
-      uploadError.style.display = 'none';
+    const data = await response.json();
+    if (response.ok) {
+      return data.data;
     } else {
-      uploadError.innerText = response.message || `Failed to upload ${type} picture`;
-      uploadError.style.display = 'block';
-      uploadSuccess.style.display = 'none';
+      console.error("Failed to fetch profile pictures:", data.message);
+      return [];
     }
   } catch (error) {
-    console.error(`Error uploading ${type} picture:`, error);
-    uploadError.innerText = `Failed to upload ${type} picture. Please try again.`;
-    uploadError.style.display = 'block';
-    uploadSuccess.style.display = 'none';
+    console.error("Error fetching profile pictures:", error);
+    return [];
   }
 }

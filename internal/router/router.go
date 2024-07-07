@@ -39,6 +39,7 @@ func (r *Router) initializeApiRoutes() {
 	r.Mux.Handle("POST "+apiPrefix+"/user", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Create)))
 	r.Mux.Handle("POST "+apiPrefix+"/user/login", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.Login)))
 	r.Mux.Handle("GET "+apiPrefix+"/user", middleware.SendApiResponse(middleware.Authenticate(http.HandlerFunc(r.UserHandler.List))))
+	r.Mux.Handle("GET "+apiPrefix+"/user/profile_pictures", middleware.SendApiResponse(http.HandlerFunc(r.UserHandler.GetProfilePictures)))
 
 	// post routes
 	r.Mux.Handle("POST "+apiPrefix+"/post", middleware.SendApiResponse(middleware.Authenticate(http.HandlerFunc(r.PostHandler.Create))))

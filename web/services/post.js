@@ -1,4 +1,3 @@
-import { uploadPicture } from '../services/utils.js';
 
 export async function fetchPosts() {
     const token = localStorage.getItem("authToken");
