@@ -17,14 +17,16 @@ export async function createUser(user) {
 
 export async function handleUserCreationSubmit(event) {
   event.preventDefault();
+
   const user = {
     username: document.getElementById("username").value,
     email: document.getElementById("email").value,
     password: document.getElementById("password").value,
-    age: parseInt(document.getElementById("age").value, 10), 
+    age: parseInt(document.getElementById("age").value, 10),
     gender: document.getElementById("gender").value,
     firstName: document.getElementById("firstName").value,
     lastName: document.getElementById("lastName").value,
+    profilePictureURL: document.querySelector('input[name="profilePicture"]:checked').value, // Capture selected profile picture
   };
 
   console.log("Form submitted:", user); // Debugging log

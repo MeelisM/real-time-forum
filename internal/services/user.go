@@ -42,7 +42,7 @@ func (uds *UserDatabaseService) Create(user *models.User) error {
 		return fmt.Errorf("failed to hash the password: %v", err)
 	}
 
-	_, err = uds.Database.Exec("INSERT INTO users (id, username, email, password, age, gender, first_name, last_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", user.Id, user.Username, user.Email, string(hashedPassword), user.Age, user.Gender, user.FirstName, user.LastName)
+	_, err = uds.Database.Exec("INSERT INTO users (id, username, email, password, age, gender, first_name, last_name, profile_picture_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", user.Id, user.Username, user.Email, string(hashedPassword), user.Age, user.Gender, user.FirstName, user.LastName, user.ProfilePictureURL)
 	if err != nil {
 		return fmt.Errorf("failed to insert user: %v", err)
 	}
@@ -120,7 +120,7 @@ func createToken(userClaims models.UserClaims) (string, error) {
 }
 
 func (uds *UserDatabaseService) GetList() ([]models.User, error) {
-	rows, err := uds.Database.Query("SELECT id, username FROM users")
+	rows, err := uds.Database.Query("SELECT id, username, profile_picture_url FROM users")
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users: %v", err)
 	}
@@ -133,7 +133,7 @@ func (uds *UserDatabaseService) GetList() ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.Id, &user.Username)
+		err := rows.Scan(&user.Id, &user.Username, &user.ProfilePictureURL)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan user: %v", err)
 		}

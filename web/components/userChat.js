@@ -1,7 +1,8 @@
 import { setupWebSocket } from '../services/websocket.js';
-import { sendMessage } from '../services/chat.js';
-import { fetchAllUsers, goBackToUserList, } from '../services/user.js';
-import { setupSendButton, setupBackButton, setupMessageInput } from '../services/utils.js';
+import { sendMessage, initializeChatButton } from '../services/chat.js';
+import { fetchAllUsers, goBackToUserList, renderUserList, selectUser } from '../services/user.js';
+import { setupSendButton, setupBackButton, setupMessageInput, setupCloseButton } from '../services/utils.js';
+import { resetChatComponent } from '../services/state.js';
 
 export async function ChatComponent() {
   const chatContainer = document.getElementById("chat-container");
@@ -12,8 +13,11 @@ export async function ChatComponent() {
 
   chatContainer.innerHTML = `
     <div id="chat-header">
-      <button id="back-button" style="display: none;">Back</button>
-      <span>Chat</span>
+      <span class="chat-title">Chat</span>
+      <div class="header-buttons">
+        <button id="back-button" class="button back-button" style="display: none;"></button>
+        <button id="close-chat-button" class="button close-button"></button>
+      </div>
     </div>
     <div id="chat-body">
       <div id="user-list-container">
@@ -36,4 +40,9 @@ export async function ChatComponent() {
   setupSendButton("send-button", sendMessage);
   setupBackButton("back-button", goBackToUserList);
   setupMessageInput("message-input", sendMessage);
+
+  setupCloseButton("close-chat-button");
+
+  initializeChatButton(ChatComponent);
+  renderUserList(); 
 }

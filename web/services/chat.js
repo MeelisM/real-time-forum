@@ -1,4 +1,4 @@
-import state from './state.js';
+import state, { resetChatComponent } from './state.js';
 import { getUsernameById } from './user.js';
 import { scrollToBottom } from './utils.js';
 
@@ -40,5 +40,24 @@ export function displayMessage(messageData) {
   if ((messageData.receiverId === state.selectedUser && messageData.senderId === state.loggedInUserId) ||
       (messageData.senderId === state.selectedUser && messageData.receiverId === state.loggedInUserId)) {
     renderChatMessages();
+  }
+}
+
+export function initializeChatButton(ChatComponent) {
+  const chatLink = document.getElementById("chat-link");
+  if (chatLink) {
+    chatLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const chatContainer = document.getElementById("chat-container");
+      if (!state.chatInitialized) {
+        chatContainer.style.display = "block";
+        chatContainer.classList.add('initial'); // Add the initial class
+        ChatComponent();
+        state.chatInitialized = true;
+      } else {
+        chatContainer.style.display = "block";
+        chatContainer.classList.add('initial'); // Ensure initial class is added
+      }
+    });
   }
 }

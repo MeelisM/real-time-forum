@@ -5,14 +5,15 @@ import (
 )
 
 type User struct {
-	Id        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	Age       int       `json:"age"`
-	Gender    Gender    `json:"gender"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
+	Id                uuid.UUID `json:"id"`
+	Username          string    `json:"username"`
+	Email             string    `json:"email"`
+	Password          string    `json:"password"`
+	Age               int       `json:"age"`
+	Gender            Gender    `json:"gender"`
+	FirstName         string    `json:"firstName"`
+	LastName          string    `json:"lastName"`
+	ProfilePictureURL string    `json:"profilePictureURL"` // Added field
 }
 
 type Gender string
@@ -31,4 +32,17 @@ type UserClaims struct {
 type LoginRequest struct {
 	UsernameOrEmail string `json:"usernameOrEmail"`
 	Password        string `json:"password"`
+}
+
+func GetProfilePictures() []string {
+	return []string{
+		"static/profile_pics/profilepic1.png",
+		"static/profile_pics/profilepic2.png",
+		"static/profile_pics/profilepic3.png",
+		"static/profile_pics/profilepic4.png",
+		"static/profile_pics/profilepic5.png",
+		"static/profile_pics/profilepic6.png",
+		"static/profile_pics/profilepic7.png",
+		"static/profile_pics/profilepic8.png",
+	}
 }

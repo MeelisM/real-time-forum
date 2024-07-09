@@ -50,7 +50,8 @@ func createUsersTable(db *sql.DB) error {
 		age INTEGER NOT NULL,
 		gender TEXT CHECK(Gender IN ('Male', 'Female', 'Prefer Not To Say')),
 		first_name VARCHAR(64) NOT NULL CHECK(length(first_name) <= 64),
-		last_name VARCHAR(64) NOT NULL CHECK(length(last_name) <= 64)
+		last_name VARCHAR(64) NOT NULL CHECK(length(last_name) <= 64),
+		profile_picture_url TEXT
 	)`)
 	if err != nil {
 		return fmt.Errorf("failed to create users table: %v", err)

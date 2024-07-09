@@ -1,13 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<title>SPA Forum</title>
-	<link rel="stylesheet" href="static/css/style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SPA Forum</title>
+  <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
-<div id="app"></div>
-<script type="module" src="app.js"></script>
+  <nav id="main-nav">
+    <ul>
+      <li class="logo"><a href="#/forum"><img src="static/img/logo.png" alt="Logo"></a></li>
+      <div class="nav-right">
+        <li><a href="#/newpost"><img src="static/img/newpost.png" alt="New Post"></a></li>
+        <li><a href="#" id="chat-link"><img src="static/img/chat.png" alt="Chat"></a></li>
+        <li id="logout-link"><a href="#/" onclick="logout()"><img src="static/img/logout.png" alt="Logout"></a></li>
+      </div>
+    </ul>
+  </nav>
+  <div id="app"></div>
+  <div id="chat-container" style="display: none;"></div>
+  <footer>
+    <p>&copy; 2024 Forum.tech All rights reserved.</p>
+  </footer>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
