@@ -26,14 +26,13 @@ export async function handleUserCreationSubmit(event) {
     gender: document.getElementById("gender").value,
     firstName: document.getElementById("firstName").value,
     lastName: document.getElementById("lastName").value,
-    profilePictureURL: document.querySelector('input[name="profilePicture"]:checked').value, // Capture selected profile picture
+    profilePictureURL: document.querySelector(
+      'input[name="profilePicture"]:checked'
+    ).value,
   };
-
-  console.log("Form submitted:", user); // Debugging log
 
   try {
     const data = await createUser(user);
-    console.log("User creation response:", data); // Debugging log
     alert("User created successfully!");
   } catch (error) {
     console.error("Error during user creation:", error);
