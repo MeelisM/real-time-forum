@@ -5,12 +5,13 @@ export default async function PostView(params) {
   const { id } = params;
 
   try {
-    const postHtml = await PostComponent(id);
+    const postHtml = await PostComponent(id);  // Render the post and comments
 
     setTimeout(() => {
       ChatComponent();
     }, 0);
 
+    // Return the HTML for the post
     return `
       <div>
         ${postHtml}
