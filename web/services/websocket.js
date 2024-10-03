@@ -7,7 +7,6 @@ function setupWebSocket() {
   state.ws = new WebSocket(wsUrl);
 
   state.ws.onopen = function () {
-    console.log("Connected to chat");
     const token = localStorage.getItem("authToken");
     const payload = JSON.parse(atob(token.split('.')[1]));
     state.loggedInUserId = payload.user_id;
@@ -18,13 +17,11 @@ function setupWebSocket() {
   };
 
   state.ws.onclose = function(event) {
-    console.log("WebSocket is closed now. Attempting to reconnect...");
     setTimeout(() => setupWebSocket(), 5000); // Try to reconnect every 5 seconds
   };
 
   state.ws.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    console.log("Received message:", data);
     handleWebSocketData(data);
   };
 }
@@ -51,7 +48,6 @@ function handleWebSocketData(data) {
       }
       break;
     default:
-      console.log("Unknown message type:", data.type);
   }
 }
 

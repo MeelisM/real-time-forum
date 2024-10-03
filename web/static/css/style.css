@@ -242,8 +242,8 @@ body {
 }
 
 .profile-pic-option img {
-    width: 90px; /* 1.5 times bigger */
-    height: 90px; /* 1.5 times bigger */
+    width: 90px; 
+    height: 90px; 
     border-radius: 50%;
     border: 2px solid transparent;
     transition: border-color 0.3s;
@@ -533,6 +533,7 @@ body {
 }
 
 
+
 /* ==========================================================================
    Page Views style
    ========================================================================== */
@@ -549,7 +550,6 @@ body {
     overflow-y: auto; 
     position: relative;
     padding-bottom: 60px; 
-
 }
 
 .post-container {
@@ -638,11 +638,17 @@ body {
     color: #606770;
 }
 
+/* ==========================================================================
+   Comment Section
+   ========================================================================== */
+
 .comment-container {
     display: flex;
     flex-direction: column;
     align-items: center; 
     width: 100%; 
+    max-width: 800px; 
+    margin: 20px auto;
 }
 
 .comment {
@@ -651,7 +657,7 @@ body {
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 25px; 
-    width: 50%; 
+    width: 100%; 
     box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.1); 
     text-align: center; 
     font-size: 18px; 
@@ -683,14 +689,65 @@ body {
     font-size: 18px; 
 }
 
-a {
-    color: #385898;
-    text-decoration: none;
+/* ==========================================================================
+   Comment Form - Smaller Version
+   ========================================================================== */
+
+   .new-comment-view {
+    background-color: #ffffff;
+    padding: 0.75rem; 
+    border-radius: 15px;
+    border: 1px solid #ccc; 
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.1); 
+    width: 100%;
+    max-width: 800px; 
+    margin: 20px auto;
 }
 
-a:hover {
-    text-decoration: underline;
+.new-comment-view h3 {
+    font-size: 1.2rem; 
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 0.75rem; 
 }
+
+.new-comment-view .form-group {
+    margin-bottom: 0.75rem; 
+}
+
+.new-comment-view textarea {
+    width: 100%;
+    padding: 0.5rem; 
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.8rem; 
+    resize: vertical;
+    height: 80px; 
+    background-color: #fff;
+}
+
+.new-comment-view button {
+    padding: 0.5rem 1rem; 
+    border: none;
+    border-radius: 4px;
+    background-color: #0258bc;
+    color: white;
+    font-size: 0.8rem; 
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.new-comment-view button:hover {
+    background-color: #003675;
+}
+
+.success {
+    color: green;
+    font-size: 0.8rem; 
+    margin-top: 0.5rem; 
+    display: none;
+}
+
 
 /* ==========================================================================
    New Post Style

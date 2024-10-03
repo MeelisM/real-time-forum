@@ -10,7 +10,6 @@ export async function fetchAllUsers() {
     });
 
     const data = await response.json();
-    console.log("Fetched users:", data);
 
     if (data.code === 200 && data.data && Array.isArray(data.data.data)) {
       state.offlineUsers = data.data.data.map((user) => ({
@@ -77,9 +76,6 @@ export function renderOnlineUsers() {
   state.onlineUsers
     .filter((user) => user.userId !== state.loggedInUserId)
     .forEach((user) => {
-      console.log(
-        `User: ${user.username}, Profile Picture URL: ${user.profilePictureURL}`
-      );
 
       const userStatus = document.createElement("div");
       userStatus.setAttribute("data-user-id", user.userId);
@@ -95,9 +91,6 @@ export function renderOnlineUsers() {
     });
 
   state.offlineUsers.forEach((user) => {
-    console.log(
-      `User: ${user.username}, Profile Picture URL: ${user.profilePictureURL}`
-    );
 
     const userStatus = document.createElement("div");
     userStatus.setAttribute("data-user-id", user.userId);
