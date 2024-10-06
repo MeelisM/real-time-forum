@@ -1,8 +1,9 @@
 import { resetChatComponent } from "./state.js";
 
 export function scrollToBottom(element) {
-  element.scrollTop = element.scrollHeight;
+  element.scrollTop = element.scrollHeight - element.clientHeight;
 }
+
 
 export function setupSendButton(sendButtonId, sendMessageCallback) {
   const sendButton = document.getElementById(sendButtonId);

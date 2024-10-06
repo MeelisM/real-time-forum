@@ -262,7 +262,7 @@ body {
    Live chat Style
    ========================================================================== */
 
-#chat-container {
+   #chat-container {
     display: flex;
     flex-direction: column;
     width: 400px;
@@ -423,27 +423,29 @@ body {
     background-color: #e6e6e6;
     display: flex;
     flex-direction: column;
+    padding-bottom: 60px; 
 }
 
 .message {
     margin-bottom: 10px;
-    padding: 10px;
+    padding: 15px; 
     border-radius: 8px;
     max-width: 70%;
     word-wrap: break-word;
     display: flex;
-    align-items: center;
-}
-
-.message img {
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    margin-right: 10px;
+    flex-direction: column; 
 }
 
 .message p {
     margin: 0;
+    font-size: 1.1rem; 
+}
+
+.message small {
+    font-size: 0.85rem; 
+    color: #666;
+    margin-top: 5px;
+    text-align: right; 
 }
 
 .message.sent {
@@ -496,6 +498,7 @@ body {
 #send-button:hover {
     background-color: #0056b3;
 }
+
 
 /* ==========================================================================
    Form Styles

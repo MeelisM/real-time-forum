@@ -10,11 +10,10 @@ export function sendMessage() {
       type: "chat_message",
       content: message,
       receiverId: state.selectedUser,
-      senderId: state.loggedInUserId, // Use the logged-in user's ID
+      senderId: state.loggedInUserId,
     };
     state.ws.send(JSON.stringify(messageData));
     messageInput.value = "";
-    // Display the sent message immediately
     displayMessage(messageData);
   }
 }
@@ -41,13 +40,17 @@ export function renderChatMessages() {
               : getUsernameById(message.senderId)
           }:</strong>
           <p>${message.content}</p>
+          <small>${new Date(message.createdAt).toLocaleString()}</small> <!-- Display the timestamp -->
         </div>
       `
       )
       .join("");
+
     scrollToBottom(chatMessagesDiv);
   }
 }
+
+
 
 export function displayMessage(messageData) {
   state.messages.push(messageData);
