@@ -10,6 +10,11 @@ module.exports = {
     filename: "app.js",
     assetModuleFilename: "static/img/[name][ext]",
   },
+  performance: {
+    hints: false,
+    maxAssetSize: 512000,
+    maxEntrypointSize: 512000,
+  },
   mode: "production",
   module: {
     rules: [

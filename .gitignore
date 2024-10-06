@@ -1,5 +1,4 @@
 bin/
-/internal/database/forum.db
 .env
 .vscode
 .git
