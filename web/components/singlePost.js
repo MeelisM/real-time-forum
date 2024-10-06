@@ -1,11 +1,21 @@
 import { fetchPostById } from '../services/post.js';
 import { CommentComponent } from './postComment.js';
 import { handleNewCommentSubmit } from '../services/comment.js'; 
+import { fetchAllUsers, getUsernameById } from '../services/user.js';  
+
+let usersLoaded = false;  
 
 export async function PostComponent(postId) {
   try {
+    if (!usersLoaded) {
+      await fetchAllUsers();  
+      usersLoaded = true;     
+    }
+
     const post = await fetchPostById(postId);  
     const comments = await CommentComponent(postId);  
+
+    const postAuthor = getUsernameById(post.userId) || 'Unknown Author';
 
     const postHtml = `
       <div class="post-view">
@@ -13,6 +23,7 @@ export async function PostComponent(postId) {
         <div class="post">
           <h2 class="post-title">${post.title}</h2>
           <div class="post-meta">
+            <small>Posted by: ${postAuthor}</small>  <!-- Show the post author's username -->
             <small>Category: ${post.category}</small>
             <small>Posted at: ${new Date(post.createdAt).toLocaleString()}</small>
           </div>
@@ -42,15 +53,14 @@ export async function PostComponent(postId) {
 
     document.getElementById('app').innerHTML = postHtml;
 
-setTimeout(() => {
-  const newCommentForm = document.getElementById('new-comment-form');
-  if (newCommentForm) {
-    newCommentForm.addEventListener('submit', (event) => handleNewCommentSubmit(event, postId));
-  } else {
-    console.error("Form not found");
-  }
-}, 0);
-
+    setTimeout(() => {
+      const newCommentForm = document.getElementById('new-comment-form');
+      if (newCommentForm) {
+        newCommentForm.addEventListener('submit', (event) => handleNewCommentSubmit(event, postId));
+      } else {
+        console.error("Form not found");
+      }
+    }, 0);
 
     return postHtml;  
 
