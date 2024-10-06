@@ -73,23 +73,32 @@ export function renderOnlineUsers() {
   onlineUsersDiv.innerHTML = "";
   offlineUsersDiv.innerHTML = "";
 
-  state.onlineUsers
+  const allUsers = [...state.onlineUsers, ...state.offlineUsers]
     .filter((user) => user.userId !== state.loggedInUserId)
-    .forEach((user) => {
-      const userStatus = document.createElement("div");
-      userStatus.setAttribute("data-user-id", user.userId);
+    .sort((a, b) => {
+      const lastMessageA = state.messages
+        .filter(
+          (message) =>
+            message.senderId === a.userId || message.receiverId === a.userId
+        )
+        .sort((m1, m2) => new Date(m2.createdAt) - new Date(m1.createdAt))[0];
 
-      const profileImagePath = user.profilePictureURL
-        ? `./${user.profilePictureURL}`
-        : "./static/img/defaultprofile.png";
+      const lastMessageB = state.messages
+        .filter(
+          (message) =>
+            message.senderId === b.userId || message.receiverId === b.userId
+        )
+        .sort((m1, m2) => new Date(m2.createdAt) - new Date(m1.createdAt))[0];
 
-      userStatus.innerHTML = `<img src="${profileImagePath}" alt="Profile Picture">${user.username} is online`;
-      userStatus.classList.add("user-status", "online-user");
-      userStatus.addEventListener("click", () => selectUser(user.userId));
-      onlineUsersDiv.appendChild(userStatus);
+      if (lastMessageA && lastMessageB) {
+        return new Date(lastMessageB.createdAt) - new Date(lastMessageA.createdAt);
+      }
+      if (lastMessageA) return -1;
+      if (lastMessageB) return 1;
+      return 0;
     });
 
-  state.offlineUsers.forEach((user) => {
+  allUsers.forEach((user) => {
     const userStatus = document.createElement("div");
     userStatus.setAttribute("data-user-id", user.userId);
 
@@ -97,10 +106,20 @@ export function renderOnlineUsers() {
       ? `./${user.profilePictureURL}`
       : "./static/img/defaultprofile.png";
 
-    userStatus.innerHTML = `<img src="${profileImagePath}" alt="Profile Picture">${user.username} is offline`;
-    userStatus.classList.add("user-status", "offline-user");
+    userStatus.innerHTML = `<img src="${profileImagePath}" alt="Profile Picture">${user.username} ${
+      state.onlineUsers.includes(user) ? "is online" : "is offline"
+    }`;
+    userStatus.classList.add(
+      "user-status",
+      state.onlineUsers.includes(user) ? "online-user" : "offline-user"
+    );
     userStatus.addEventListener("click", () => selectUser(user.userId));
-    offlineUsersDiv.appendChild(userStatus);
+
+    if (state.onlineUsers.includes(user)) {
+      onlineUsersDiv.appendChild(userStatus);
+    } else {
+      offlineUsersDiv.appendChild(userStatus);
+    }
   });
 }
 

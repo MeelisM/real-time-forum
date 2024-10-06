@@ -1,19 +1,15 @@
 import { fetchPosts } from '../services/post.js';
-import { fetchAllUsers, getUsernameById } from '../services/user.js'; 
+import { fetchAllUsers, getUsernameById } from '../services/user.js';  // Assume fetchAllUsers loads all user data
 
 let allPosts = [];
 let isLoading = false;
 let currentPage = 1;
-let usersLoaded = false; 
 
 export async function ForumPostComponent() {
   try {
-    if (!usersLoaded) {
-      await fetchAllUsers();  s
-      usersLoaded = true;      
-    }
-
-   
+    // Fetch users before rendering posts
+    await fetchAllUsers(); // Ensure all user data is loaded
+    
     if (allPosts.length === 0) {
       allPosts = await fetchPosts();
     }
@@ -85,6 +81,10 @@ async function handleScroll() {
 async function loadMorePosts() {
   try {
     const newPosts = await fetchPosts(currentPage);
+
+    // Ensure that users are loaded before loading more posts
+    await fetchAllUsers(); 
+
     allPosts = [...allPosts, ...newPosts];
 
     const postsHtml = allPosts
