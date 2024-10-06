@@ -1,29 +1,41 @@
 import { fetchPosts } from '../services/post.js';
+import { fetchAllUsers, getUsernameById } from '../services/user.js'; 
 
 let allPosts = [];
 let isLoading = false;
 let currentPage = 1;
+let usersLoaded = false; 
 
 export async function ForumPostComponent() {
   try {
+    if (!usersLoaded) {
+      await fetchAllUsers();  s
+      usersLoaded = true;      
+    }
+
+   
     if (allPosts.length === 0) {
       allPosts = await fetchPosts();
     }
 
     const postsHtml = allPosts
-      .map(
-        (post) => `
+      .map((post) => {
+        const username = getUsernameById(post.userId) || 'Unknown Author';  
+        return `
           <div class="post" onclick="location.href='#/post/${post.id}'">
             <div class="post-header">
               <div class="post-category ${getCategoryClass(post.category)}">${post.category}</div>
               <h2 class="post-title">${post.title}</h2>
-              <div class="post-meta">Posted at: ${new Date(post.createdAt).toLocaleString()}</div>
+              <div class="post-meta">
+                <span>Posted by: ${username}</span>  <!-- Show the username here -->
+                <span>Posted at: ${new Date(post.createdAt).toLocaleString()}</span>
+              </div>
             </div>
             <p class="post-content">${post.content}</p>
             <small class="comment-count">Comments: ${post.commentsCount}</small>
           </div>
-        `
-      )
+        `;
+      })
       .join('');
 
     return `
@@ -76,19 +88,23 @@ async function loadMorePosts() {
     allPosts = [...allPosts, ...newPosts];
 
     const postsHtml = allPosts
-      .map(
-        (post) => `
+      .map((post) => {
+        const username = getUsernameById(post.userId) || 'Unknown Author';
+        return `
           <div class="post" onclick="location.href='#/post/${post.id}'">
             <div class="post-header">
               <div class="post-category ${getCategoryClass(post.category)}">${post.category}</div>
               <h2 class="post-title">${post.title}</h2>
-              <div class="post-meta">Posted at: ${new Date(post.createdAt).toLocaleString()}</div>
+              <div class="post-meta">
+                <span>Posted by: ${username}</span> 
+                <span>Posted at: ${new Date(post.createdAt).toLocaleString()}</span>
+              </div>
             </div>
             <p class="post-content">${post.content}</p>
             <small class="comment-count">Comments: ${post.commentsCount}</small>
           </div>
-        `
-      )
+        `;
+      })
       .join('');
 
     const forumView = document.getElementById('forum-view');

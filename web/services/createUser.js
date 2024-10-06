@@ -34,8 +34,12 @@ export async function handleUserCreationSubmit(event) {
   try {
     const data = await createUser(user);
     alert("User created successfully!");
+
+    window.location.hash = '#/'; 
+
   } catch (error) {
     console.error("Error during user creation:", error);
     alert("User creation failed. Please try again.");
   }
 }
+
