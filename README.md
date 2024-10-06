@@ -11,7 +11,7 @@ git clone https://01.kood.tech/git/mmumm/real-time-forum.git
 cd real-time-forum
 ```
 
-Create an `.env` file or rename `.env-example` to `.env` and add these fields
+Create an `.env` file or rename `.env-example` to `.env`.
 
 ```
 PORT=8080
