@@ -1,11 +1,9 @@
-import { resetChatComponent } from './state.js';
+import { resetChatComponent } from "./state.js";
 
-// helper function to scroll chat messages to bottom
 export function scrollToBottom(element) {
   element.scrollTop = element.scrollHeight;
 }
 
-// chat send button
 export function setupSendButton(sendButtonId, sendMessageCallback) {
   const sendButton = document.getElementById(sendButtonId);
   if (sendButton) {
@@ -18,20 +16,18 @@ export function setupSendButton(sendButtonId, sendMessageCallback) {
   }
 }
 
-// button to navigate back to user list in chat window
 export function setupBackButton(backButtonId, goBackCallback) {
   const backButton = document.getElementById(backButtonId);
   if (backButton) {
     backButton.addEventListener("click", (e) => {
       e.preventDefault();
-      goBackCallback(); 
+      goBackCallback();
     });
   } else {
     console.error("Back button not found!");
   }
 }
 
-// button to close chat window
 export function setupCloseButton(closeButtonId) {
   const closeButton = document.getElementById(closeButtonId);
   if (closeButton) {
@@ -46,7 +42,6 @@ export function setupCloseButton(closeButtonId) {
   }
 }
 
-// send messages with enter
 export function setupMessageInput(messageInputId, sendMessageCallback) {
   const messageInput = document.getElementById(messageInputId);
   if (messageInput) {
@@ -61,15 +56,17 @@ export function setupMessageInput(messageInputId, sendMessageCallback) {
   }
 }
 
-// fetching profile pictures from backend
 export async function fetchProfilePictures() {
   try {
-    const response = await fetch('http://localhost:8080/api/user/profile_pictures', {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      "http://localhost:8080/api/user/profile_pictures",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     const data = await response.json();
     if (response.ok) {

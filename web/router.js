@@ -26,7 +26,9 @@ class Router {
         document.getElementById("app").innerHTML = await LoginView();
         this.toggleNavBar(false);
       } else {
-        document.getElementById("app").innerHTML = await route.view(this.getParams(route, path));
+        document.getElementById("app").innerHTML = await route.view(
+          this.getParams(route, path)
+        );
         this.toggleNavBar(route.path !== "/" && route.path !== "/register");
       }
     }
@@ -35,7 +37,7 @@ class Router {
   matchRoute(path) {
     return this.routes.find((route) => {
       const routePath = route.path
-        .replace(/:[^\s/]+/g, "([\\w-]+)") // Replace :id with a regex capture group
+        .replace(/:[^\s/]+/g, "([\\w-]+)")
         .replace(/\//g, "\\/");
       const regex = new RegExp(`^${routePath}$`);
       return regex.test(path);
@@ -43,8 +45,14 @@ class Router {
   }
 
   getParams(route, path) {
-    const values = path.match(new RegExp(route.path.replace(/:[^\s/]+/g, "([\\w-]+)").replace(/\//g, "\\/")));
-    const keys = [...route.path.matchAll(/:([^\s/]+)/g)].map(result => result[1]);
+    const values = path.match(
+      new RegExp(
+        route.path.replace(/:[^\s/]+/g, "([\\w-]+)").replace(/\//g, "\\/")
+      )
+    );
+    const keys = [...route.path.matchAll(/:([^\s/]+)/g)].map(
+      (result) => result[1]
+    );
     return keys.reduce((params, key, index) => {
       params[key] = values[index + 1];
       return params;

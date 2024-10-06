@@ -1,6 +1,5 @@
-
 export function LoginComponent() {
-    const loginFormHTML = `
+  const loginFormHTML = `
     <div class="center-container">
       <div class="user-container">
           <div class="logo-container">
@@ -21,44 +20,38 @@ export function LoginComponent() {
       </div>
     </div>
   `;
-    return loginFormHTML;
+  return loginFormHTML;
 }
 
 export async function handleLoginSubmit(event) {
-    event.preventDefault();
-    const usernameOrEmail = document.getElementById("user").value;
-    const password = document.getElementById("password").value;
+  event.preventDefault();
+  const usernameOrEmail = document.getElementById("user").value;
+  const password = document.getElementById("password").value;
 
-    console.log("Form submitted:", { usernameOrEmail, password }); // Debugging log
+  try {
+    const response = await fetch("http://localhost:8080/api/user/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ usernameOrEmail, password }),
+    });
 
-    try {
-        const response = await fetch("http://localhost:8080/api/user/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ usernameOrEmail, password }),
-        });
+    const data = await response.json();
 
-        const data = await response.json();
+    if (data.code === 200) {
+      const userId = data.data.id;
+      const username = usernameOrEmail;
+      localStorage.setItem("authToken", data.data.token);
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("username", username);
 
-        console.log("Login response:", data); // Debugging log
-
-        if (data.code === 200) {
-            const userId = data.data.id;
-            const username = usernameOrEmail; 
-            localStorage.setItem("authToken", data.data.token);
-            localStorage.setItem("userId", userId);
-            localStorage.setItem("username", username); 
-            
-            console.log("Saved username:", localStorage.getItem("username")); // Debugging log
-
-            window.location.hash = "#/forum";
-        } else {
-            alert(data.message || "Login failed");
-        }
-    } catch (error) {
-        console.error("Error during login:", error);
-        alert("Login failed. Please try again.");
+      window.location.hash = "#/forum";
+    } else {
+      alert(data.message || "Login failed");
     }
+  } catch (error) {
+    console.error("Error during login:", error);
+    alert("Login failed. Please try again.");
+  }
 }

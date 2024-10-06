@@ -76,7 +76,6 @@ export function renderOnlineUsers() {
   state.onlineUsers
     .filter((user) => user.userId !== state.loggedInUserId)
     .forEach((user) => {
-
       const userStatus = document.createElement("div");
       userStatus.setAttribute("data-user-id", user.userId);
 
@@ -91,7 +90,6 @@ export function renderOnlineUsers() {
     });
 
   state.offlineUsers.forEach((user) => {
-
     const userStatus = document.createElement("div");
     userStatus.setAttribute("data-user-id", user.userId);
 
@@ -147,7 +145,6 @@ export function selectUser(userID) {
     }
   });
 
-  // Request chat history for the selected user
   state.ws.send(
     JSON.stringify({ type: "get_chat_history", receiverId: state.selectedUser })
   );
