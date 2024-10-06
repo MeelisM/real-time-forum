@@ -1,14 +1,20 @@
-import state from './state.js';
-import { renderChatMessages, displayMessage } from './chat.js';
-import { updateOnlineUsers, removeDuplicateUsers, renderOnlineUsers } from './user.js';
+import state from "./state.js";
+import { renderChatMessages, displayMessage } from "./chat.js";
+import {
+  updateOnlineUsers,
+  removeDuplicateUsers,
+  renderOnlineUsers,
+} from "./user.js";
 
 function setupWebSocket() {
-  let wsUrl = `ws://localhost:8080/ws?token=${localStorage.getItem("authToken")}`;
+  let wsUrl = `ws://localhost:8080/ws?token=${localStorage.getItem(
+    "authToken"
+  )}`;
   state.ws = new WebSocket(wsUrl);
 
   state.ws.onopen = function () {
     const token = localStorage.getItem("authToken");
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split(".")[1]));
     state.loggedInUserId = payload.user_id;
   };
 
@@ -16,8 +22,8 @@ function setupWebSocket() {
     console.error("WebSocket error:", event);
   };
 
-  state.ws.onclose = function(event) {
-    setTimeout(() => setupWebSocket(), 5000); // Try to reconnect every 5 seconds
+  state.ws.onclose = function (event) {
+    setTimeout(() => setupWebSocket(), 5000);
   };
 
   state.ws.onmessage = function (event) {
@@ -29,7 +35,7 @@ function setupWebSocket() {
 function handleWebSocketData(data) {
   switch (data.type) {
     case "chat_history":
-      state.messages = data.messages || []; // Handle null messages
+      state.messages = data.messages || [];
       renderChatMessages();
       break;
     case "user_status":
@@ -41,7 +47,10 @@ function handleWebSocketData(data) {
     case "initial_online_users":
       state.onlineUsers = data.onlineUsers;
       removeDuplicateUsers();
-      if (document.getElementById("online-users") && document.getElementById("offline-users")) {
+      if (
+        document.getElementById("online-users") &&
+        document.getElementById("offline-users")
+      ) {
         renderOnlineUsers();
       } else {
         console.error("User list containers not found!");
@@ -51,7 +60,4 @@ function handleWebSocketData(data) {
   }
 }
 
-export {
-  setupWebSocket,
-  handleWebSocketData
-};
+export { setupWebSocket, handleWebSocketData };

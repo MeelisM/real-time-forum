@@ -1,17 +1,16 @@
-import { PostComponent } from '../components/singlePost.js';
-import { ChatComponent } from '../components/userChat.js';
+import { PostComponent } from "../components/singlePost.js";
+import { ChatComponent } from "../components/userChat.js";
 
 export default async function PostView(params) {
   const { id } = params;
 
   try {
-    const postHtml = await PostComponent(id);  // Render the post and comments
+    const postHtml = await PostComponent(id);
 
     setTimeout(() => {
       ChatComponent();
     }, 0);
 
-    // Return the HTML for the post
     return `
       <div>
         ${postHtml}

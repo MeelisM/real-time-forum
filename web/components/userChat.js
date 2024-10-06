@@ -1,8 +1,18 @@
-import { setupWebSocket } from '../services/websocket.js';
-import { sendMessage, initializeChatButton } from '../services/chat.js';
-import { fetchAllUsers, goBackToUserList, renderUserList, selectUser } from '../services/user.js';
-import { setupSendButton, setupBackButton, setupMessageInput, setupCloseButton } from '../services/utils.js';
-import { resetChatComponent } from '../services/state.js';
+import { setupWebSocket } from "../services/websocket.js";
+import { sendMessage, initializeChatButton } from "../services/chat.js";
+import {
+  fetchAllUsers,
+  goBackToUserList,
+  renderUserList,
+  selectUser,
+} from "../services/user.js";
+import {
+  setupSendButton,
+  setupBackButton,
+  setupMessageInput,
+  setupCloseButton,
+} from "../services/utils.js";
+import { resetChatComponent } from "../services/state.js";
 
 export async function ChatComponent() {
   const chatContainer = document.getElementById("chat-container");
@@ -44,5 +54,5 @@ export async function ChatComponent() {
   setupCloseButton("close-chat-button");
 
   initializeChatButton(ChatComponent);
-  renderUserList(); 
+  renderUserList();
 }
