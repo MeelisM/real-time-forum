@@ -75,5 +75,3 @@ username: anotherUser
 password: password
 email: anotherUser@user.com
 ```
-
-##### Authors: Tabel Dubolazov, Meelis Mumm
